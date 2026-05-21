@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import {
   HiOutlineChevronRight,
   HiOutlineTag,
   HiOutlineBookOpen,
+  HiOutlineXMark,
 } from "react-icons/hi2";
 import DoubtFeedCard from "./_doubt-feed-card";
 import { DUMMY_TAGS } from "./_dashboard-data";
@@ -42,7 +44,18 @@ interface DoubtFeedProps {
   showFilters?: boolean;
   doubts: RecentDoubt[];
   stats?: DashboardStats;
+  selectedSubject?: string | null;
+  onClearSubject?: () => void;
 }
+
+const FILTERS = [
+  { key: "ALL", label: "All" },
+  { key: "OPEN", label: "Open" },
+  { key: "UNDER_REVIEW", label: "Reviewing" },
+  { key: "RESOLVED", label: "Resolved" },
+] as const;
+
+type FilterKey = (typeof FILTERS)[number]["key"];
 
 export default function DoubtFeed({
   isStudent,
@@ -50,7 +63,16 @@ export default function DoubtFeed({
   showFilters,
   doubts,
   stats,
+  selectedSubject,
+  onClearSubject,
 }: DoubtFeedProps) {
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("ALL");
+
+  const filteredDoubts =
+    activeFilter === "ALL"
+      ? doubts
+      : doubts.filter((d) => d.status === activeFilter);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Stats row — mobile/tablet only */}
@@ -201,44 +223,70 @@ export default function DoubtFeed({
             </CardContent>
           </Card>
 
-          {/* Subjects placeholder — real data from RightSidebar */}
         </>
       )}
 
       {/* Feed header */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-mono text-sm font-semibold text-white">
-          {isStudent ? "Recent Doubts" : "All Doubts"}
-        </h2>
-        <div className="flex gap-1">
-          {["All", "Open", "Resolved"].map((f, i) => (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="font-mono text-sm font-semibold text-white">
+            {selectedSubject ? selectedSubject : isStudent ? "Recent Doubts" : "All Doubts"}
+            {activeFilter !== "ALL" && (
+              <span className="ml-2 text-white/30 font-normal">
+                ({filteredDoubts.length})
+              </span>
+            )}
+          </h2>
+          <div className="flex gap-1">
+          {FILTERS.map((f) => (
             <button
-              key={f}
+              key={f.key}
+              onClick={() => setActiveFilter(f.key)}
               className={`rounded-full px-3 py-1 font-mono text-xs transition-colors cursor-pointer ${
-                i === 0
+                activeFilter === f.key
                   ? "bg-amber-500/20 text-amber-400"
                   : "text-white/40 hover:text-white hover:bg-white/10"
               }`}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
+        </div>
+        {selectedSubject && onClearSubject && (
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-xs text-amber-400">
+              <HiOutlineBookOpen className="h-3 w-3" />
+              {selectedSubject}
+              <button
+                onClick={onClearSubject}
+                className="ml-1 rounded-full p-0.5 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              >
+                <HiOutlineXMark className="h-3 w-3" />
+              </button>
+            </span>
+            <span className="font-mono text-xs text-white/30">
+              {doubts.length} doubt{doubts.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Doubt cards */}
-      {doubts.length === 0 ? (
+      {filteredDoubts.length === 0 ? (
         <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <HiOutlineSparkles className="mb-3 h-10 w-10 text-white/15" />
             <p className="font-mono text-sm text-white/40">
-              No doubts posted yet
+              {activeFilter === "ALL"
+                ? "No doubts posted yet"
+                : `No ${activeFilter.toLowerCase().replace("_", " ")} doubts`}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
-          {doubts.map((doubt) => (
+          {filteredDoubts.map((doubt) => (
             <DoubtFeedCard
               key={doubt.id}
               doubt={{

@@ -1,7 +1,30 @@
-export default function ProfilePage() {
+import { redirect } from "next/navigation";
+import { getServerSession } from "@/lib/get-sessions";
+import { getDashboardStats } from "@/lib/actions/doubt";
+import ProfileView from "@/views/profile/_profile-view";
+
+export default async function ProfilePage() {
+  const session = await getServerSession();
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
+
+  const stats = await getDashboardStats();
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <h1 className="font-mono text-3xl font-bold text-white">Profile</h1>
-    </div>
+    <ProfileView
+      user={{
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+        image: session.user.image ?? null,
+      }}
+      stats={{
+        total: stats?.total ?? 0,
+        open: stats?.open ?? 0,
+        resolved: stats?.resolved ?? 0,
+      }}
+    />
   );
 }

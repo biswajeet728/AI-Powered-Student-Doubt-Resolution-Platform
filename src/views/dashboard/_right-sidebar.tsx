@@ -6,11 +6,19 @@ import { useSubjects } from "@/lib/hooks/use-subjects";
 import SubjectFilter from "./_subject-filter";
 import { DUMMY_TAGS } from "./_dashboard-data";
 
-export default function RightSidebar() {
-  const { data: subjects = [] } = useSubjects();
+interface RightSidebarProps {
+  selectedSubject: string | null;
+  onSelectSubject: (subject: string | null) => void;
+}
+
+export default function RightSidebar({
+  selectedSubject,
+  onSelectSubject,
+}: RightSidebarProps) {
+  const { data: subjects = [], isPending } = useSubjects();
 
   return (
-    <aside className="sticky top-18 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {/* Filter by Tags */}
       <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
         <CardContent className="p-4">
@@ -45,8 +53,21 @@ export default function RightSidebar() {
               Filter by Subject
             </span>
           </div>
-          {subjects.length > 0 ? (
-            <SubjectFilter subjects={subjects} />
+          {isPending ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white/10 animate-pulse w-full py-4 rounded-lg"
+                />
+              ))}
+            </div>
+          ) : subjects.length > 0 ? (
+            <SubjectFilter
+              subjects={subjects}
+              selectedSubject={selectedSubject}
+              onSelect={onSelectSubject}
+            />
           ) : (
             <p className="font-mono text-xs text-white/30 py-4 text-center">
               No subjects yet
@@ -54,6 +75,6 @@ export default function RightSidebar() {
           )}
         </CardContent>
       </Card>
-    </aside>
+    </div>
   );
 }

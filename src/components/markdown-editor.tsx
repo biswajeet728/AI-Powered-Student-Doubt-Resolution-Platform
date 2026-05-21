@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 
 interface MarkdownEditorProps {
@@ -19,13 +18,12 @@ export default function MarkdownEditor({
   return (
     <div
       data-color-mode="dark"
-      className="rounded-md overflow-hidden border border-white/10 focus-within:border-amber-500/50 transition-colors bg-[#2a2826]/80"
+      className="md-editor-override rounded-md overflow-hidden border border-white/10 focus-within:border-amber-500/50 transition-colors bg-white/5"
     >
       <MDEditor
         value={value}
         onChange={(val) => onChange(val || "")}
         height={minHeight}
-        className="bg-[#2a2826]/80 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-transparent"
         preview="edit"
         visibleDragbar={false}
         textareaProps={{
@@ -33,7 +31,7 @@ export default function MarkdownEditor({
           style: {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: "14px",
-            backgroundColor: "transparent",
+            color: "rgba(255,255,255,0.7)",
           },
         }}
       />

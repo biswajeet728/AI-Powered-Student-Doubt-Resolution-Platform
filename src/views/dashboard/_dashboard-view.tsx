@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRecentDoubts, useDashboardStats } from "@/lib/hooks/use-doubts";
 import LeftSidebar from "./_left-sidebar";
 import RightSidebar from "./_right-sidebar";
@@ -31,13 +32,23 @@ interface DashboardViewProps {
   initialDoubts: RecentDoubt[];
 }
 
-export default function DashboardView({ user, initialStats, initialDoubts }: DashboardViewProps) {
+export default function DashboardView({
+  user,
+  initialStats,
+  initialDoubts,
+}: DashboardViewProps) {
   const isStudent = user.role === "STUDENT";
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
   // React Query with SSR initial data
   const { data: doubts = initialDoubts } = useRecentDoubts(10);
   const { data: statsData } = useDashboardStats();
   const stats = statsData ?? initialStats;
+
+  // Client-side subject filter
+  const filteredDoubts = selectedSubject
+    ? doubts.filter((d) => d.subject === selectedSubject)
+    : doubts;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
@@ -47,25 +58,51 @@ export default function DashboardView({ user, initialStats, initialDoubts }: Das
           <LeftSidebar user={user} stats={stats} />
         </div>
         <main>
-          <DoubtFeed isStudent={isStudent} doubts={doubts} />
+          <DoubtFeed
+            isStudent={isStudent}
+            doubts={filteredDoubts}
+            selectedSubject={selectedSubject}
+            onClearSubject={() => setSelectedSubject(null)}
+          />
         </main>
         <div>
-          <RightSidebar />
+          <RightSidebar
+            selectedSubject={selectedSubject}
+            onSelectSubject={setSelectedSubject}
+          />
         </div>
       </div>
 
       {/* Tablet: 2 columns (feed + right sidebar) */}
       <div className="hidden md:grid lg:hidden grid-cols-[1fr_250px] gap-4">
         <main>
-          <DoubtFeed isStudent={isStudent} showStats doubts={doubts} stats={stats} />
+          <DoubtFeed
+            isStudent={isStudent}
+            showStats
+            doubts={filteredDoubts}
+            stats={stats}
+            selectedSubject={selectedSubject}
+            onClearSubject={() => setSelectedSubject(null)}
+          />
         </main>
-        <RightSidebar />
+        <div className="self-start sticky top-18">
+          <RightSidebar
+            selectedSubject={selectedSubject}
+            onSelectSubject={setSelectedSubject}
+          />
+        </div>
       </div>
 
       {/* Mobile: single column */}
       <div className="md:hidden">
         <main>
-          <DoubtFeed isStudent={isStudent} showStats showFilters doubts={doubts} stats={stats} />
+          <DoubtFeed
+            isStudent={isStudent}
+            showStats
+            showFilters
+            doubts={filteredDoubts}
+            stats={stats}
+          />
         </main>
       </div>
     </div>

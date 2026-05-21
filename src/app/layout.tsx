@@ -28,7 +28,27 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
-        <Toaster richColors position="top-right" />
+        <Toaster
+          position="top-right"
+          theme="dark"
+          richColors
+          toastOptions={{
+            style: {
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "13px",
+              backgroundColor: "#2a2826",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff",
+            },
+            classNames: {
+              toast: "!shadow-lg !shadow-black/30",
+              title: "!font-mono !text-sm",
+              description: "!font-mono !text-xs !text-white/60",
+              actionButton: "!font-mono",
+              cancelButton: "!font-mono",
+            },
+          }}
+        />
       </body>
     </html>
   );

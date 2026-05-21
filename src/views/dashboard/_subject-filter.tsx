@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { HiOutlineBookOpen, HiOutlineChevronDown } from "react-icons/hi2";
+import { HiOutlineChevronDown } from "react-icons/hi2";
 import type { SubjectWithCount } from "@/lib/actions/subject";
 
 interface SubjectFilterProps {
   subjects: SubjectWithCount[];
+  selectedSubject: string | null;
+  onSelect: (subject: string | null) => void;
 }
 
-export default function SubjectFilter({ subjects }: SubjectFilterProps) {
+export default function SubjectFilter({ subjects, selectedSubject, onSelect }: SubjectFilterProps) {
   const [showAll, setShowAll] = useState(false);
   const VISIBLE_COUNT = 10;
   const hasMore = subjects.length > VISIBLE_COUNT;
@@ -17,9 +19,16 @@ export default function SubjectFilter({ subjects }: SubjectFilterProps) {
   return (
     <div className="flex flex-col gap-1">
       {/* All subjects */}
-      <button className="flex items-center justify-between rounded-lg px-2.5 py-2 font-mono text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20 cursor-pointer">
+      <button
+        onClick={() => onSelect(null)}
+        className={`flex items-center justify-between rounded-lg px-2.5 py-2 font-mono text-xs cursor-pointer transition-colors ${
+          selectedSubject === null
+            ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
+            : "text-white/50 hover:bg-white/5 hover:text-white"
+        }`}
+      >
         <span>All subjects</span>
-        <span className="text-amber-400/60">
+        <span className={selectedSubject === null ? "text-amber-400/60" : "text-white/20"}>
           {subjects.reduce((a, s) => a + s.doubtCount, 0)}
         </span>
       </button>
@@ -27,10 +36,17 @@ export default function SubjectFilter({ subjects }: SubjectFilterProps) {
       {visibleSubjects.map((subject) => (
         <button
           key={subject.id}
-          className="flex items-center justify-between rounded-lg px-2.5 py-2 font-mono text-xs text-white/50 transition-colors hover:bg-white/5 hover:text-white cursor-pointer"
+          onClick={() => onSelect(subject.name)}
+          className={`flex items-center justify-between rounded-lg px-2.5 py-2 font-mono text-xs cursor-pointer transition-colors ${
+            selectedSubject === subject.name
+              ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
+              : "text-white/50 hover:bg-white/5 hover:text-white"
+          }`}
         >
           <span>{subject.name}</span>
-          <span className="text-white/20">{subject.doubtCount}</span>
+          <span className={selectedSubject === subject.name ? "text-amber-400/60" : "text-white/20"}>
+            {subject.doubtCount}
+          </span>
         </button>
       ))}
 

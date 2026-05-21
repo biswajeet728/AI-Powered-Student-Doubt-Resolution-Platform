@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   HiOutlineSparkles,
   HiOutlineClock,
   HiOutlineCheckCircle,
   HiOutlineChatBubbleLeftRight,
   HiOutlineBookOpen,
+  HiOutlineUser,
 } from "react-icons/hi2";
 import StatCard from "./_stat-card";
 
@@ -24,15 +26,22 @@ export default function LeftSidebar({ user, stats }: LeftSidebarProps) {
 
   return (
     <aside className="sticky top-18 flex flex-col gap-3">
-      {/* Welcome */}
-      <div className="mb-1">
-        <p className="font-mono text-xs text-white/40">
-          {isStudent ? "Student" : "Teacher"}
-        </p>
-        <h1 className="font-mono text-base font-bold text-white leading-tight">
-          {user.name.split(" ")[0]}
-        </h1>
-      </div>
+      {/* Welcome card */}
+      <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
+        <CardContent className="flex items-center gap-3 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-black">
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <h1 className="font-mono text-sm font-bold text-white leading-tight truncate">
+              {user.name}
+            </h1>
+            <span className="font-mono text-xs text-white/40">
+              {isStudent ? "Student" : "Teacher"}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       <StatCard
         icon={<HiOutlineSparkles className="h-5 w-5 text-amber-400" />}

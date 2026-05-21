@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSubjects } from "@/lib/actions/subject";
 import HeaderDashboard from "@/views/dashboard/_header-dashboard";
 import AskDoubtModal from "@/views/dashboard/_ask-doubt-modal";
+import AuthenticatedWrapper from "./_authenticated-wrapper";
 
 export default async function AuthenticatedLayout({
   children,
@@ -19,14 +20,18 @@ export default async function AuthenticatedLayout({
   const subjects = await getSubjects();
 
   return (
-    <>
-      <HeaderDashboard user={{ name: user.name, role: user.role }} />
-      <main className="min-h-screen">
-        {children}
-      </main>
-      {user.role === "STUDENT" && (
-        <AskDoubtModal subjects={subjects} />
-      )}
-    </>
+    <AuthenticatedWrapper
+      initialUser={{
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image ?? null,
+      }}
+      header={<HeaderDashboard />}
+      modal={user.role === "STUDENT" ? <AskDoubtModal subjects={subjects} /> : null}
+    >
+      {children}
+    </AuthenticatedWrapper>
   );
 }

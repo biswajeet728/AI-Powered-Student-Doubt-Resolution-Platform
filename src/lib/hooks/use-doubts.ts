@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createDoubt,
+  updateDoubt,
   getMyDoubts,
   getDoubtById,
   getRecentDoubts,
@@ -8,7 +9,7 @@ import {
   updateDoubtStatus,
   deleteDoubt,
 } from "@/lib/actions/doubt";
-import type { CreateDoubtInput } from "@/lib/actions/doubt";
+import type { CreateDoubtInput, UpdateDoubtInput } from "@/lib/actions/doubt";
 
 // ── Query keys ──────────────────────────────────────────────────────
 export const doubtKeys = {
@@ -57,6 +58,24 @@ export function useCreateDoubt() {
     mutationFn: (input: CreateDoubtInput) => createDoubt(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doubtKeys.all });
+    },
+  });
+}
+
+export function useUpdateDoubt() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      doubtId,
+      input,
+    }: {
+      doubtId: string;
+      input: UpdateDoubtInput;
+    }) => updateDoubt(doubtId, input),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: doubtKeys.all });
+      queryClient.invalidateQueries({ queryKey: doubtKeys.detail(variables.doubtId) });
     },
   });
 }

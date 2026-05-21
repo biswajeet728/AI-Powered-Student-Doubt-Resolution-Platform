@@ -39,6 +39,55 @@ export async function createDoubt(input: CreateDoubtInput) {
   }
 }
 
+export interface UpdateDoubtInput {
+  title: string;
+  body: string;
+  subjectId?: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+}
+
+export async function updateDoubt(doubtId: string, input: UpdateDoubtInput) {
+  const session = await getServerSession();
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  if (!input.title.trim() || !input.body.trim()) {
+    return { success: false, error: "Title and body are required" };
+  }
+
+  try {
+    const doubt = await prisma.doubt.findUnique({
+      where: { id: doubtId },
+      select: { userId: true },
+    });
+
+    if (!doubt) {
+      return { success: false, error: "Doubt not found" };
+    }
+
+    if (doubt.userId !== session.user.id) {
+      return { success: false, error: "Not authorized" };
+    }
+
+    await prisma.doubt.update({
+      where: { id: doubtId },
+      data: {
+        title: input.title.trim(),
+        body: input.body.trim(),
+        difficulty: input.difficulty,
+        subjectId: input.subjectId || null,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update doubt";
+    return { success: false, error: message };
+  }
+}
+
 export async function getMyDoubts(
   status?: "OPEN" | "UNDER_REVIEW" | "RESOLVED",
 ) {
@@ -89,14 +138,7 @@ export async function getDoubtById(doubtId: string) {
       return { success: false, error: "Doubt not found" };
     }
 
-    // Students can only view their own doubts, teachers can view all
-    if (
-      session?.user?.role === "STUDENT" &&
-      doubt.userId !== session.user.id
-    ) {
-      return { success: false, error: "Not authorized" };
-    }
-
+    // Anyone logged in can view any doubt
     return { success: true, doubt, currentUserId: session?.user?.id };
   } catch (error) {
     const message =

@@ -40,18 +40,6 @@ export default function AskDoubtModal({ subjects }: AskDoubtModalProps) {
 
   return (
     <>
-      {/* Trigger hint — shown in left sidebar or as floating badge */}
-      <button
-        onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-1.5 rounded-lg border border-dashed border-white/10 bg-white/5 px-3 py-2 font-mono text-xs text-white/30 hover:border-amber-500/30 hover:text-amber-400 transition-colors cursor-pointer"
-      >
-        <HiOutlineSparkles className="h-3.5 w-3.5" />
-        Ask a Doubt
-        <kbd className="ml-auto rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/25">
-          Alt+Q
-        </kbd>
-      </button>
-
       {/* Modal */}
       {open && (
         <>

@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useDoubtById, useUpdateDoubtStatus, useDeleteDoubt } from "@/lib/hooks/use-doubts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import MarkdownRenderer from "@/components/markdown-renderer";
+import EditDoubtModal from "./_edit-doubt-modal";
 import {
   HiOutlineArrowLeft,
   HiOutlineSparkles,
@@ -13,7 +15,9 @@ import {
   HiOutlineUser,
   HiOutlineTrash,
   HiOutlineAcademicCap,
+  HiOutlinePencilSquare,
 } from "react-icons/hi2";
+import type { SubjectWithCount } from "@/lib/actions/subject";
 
 interface DoubtDetail {
   id: string;
@@ -21,6 +25,7 @@ interface DoubtDetail {
   body: string;
   status: "OPEN" | "UNDER_REVIEW" | "RESOLVED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
+  subjectId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   user: { id: string; name: string; role: string };
@@ -39,6 +44,7 @@ interface DoubtDetailViewProps {
   doubtId: string;
   initialDoubt: DoubtDetail;
   currentUserId?: string;
+  subjects: SubjectWithCount[];
 }
 
 const statusConfig = {
@@ -62,8 +68,9 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default function DoubtDetailView({ doubtId, initialDoubt, currentUserId }: DoubtDetailViewProps) {
+export default function DoubtDetailView({ doubtId, initialDoubt, currentUserId, subjects }: DoubtDetailViewProps) {
   const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data: result } = useDoubtById(doubtId);
   const updateMutation = useUpdateDoubtStatus();
@@ -129,6 +136,16 @@ export default function DoubtDetailView({ doubtId, initialDoubt, currentUserId }
             </div>
             {isOwner && (
               <div className="flex items-center gap-1">
+                {doubt.status !== "RESOLVED" && (
+                  <button
+                    onClick={() => setEditOpen(true)}
+                    disabled={updateMutation.isPending}
+                    className="p-1.5 rounded-md text-white/20 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                    title="Edit"
+                  >
+                    <HiOutlinePencilSquare className="h-4 w-4" />
+                  </button>
+                )}
                 {doubt.status !== "RESOLVED" && (
                   <button
                     onClick={handleResolve}
@@ -239,6 +256,22 @@ export default function DoubtDetailView({ doubtId, initialDoubt, currentUserId }
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {isOwner && (
+        <EditDoubtModal
+          doubtId={doubt.id}
+          initialData={{
+            title: doubt.title,
+            body: doubt.body,
+            difficulty: doubt.difficulty,
+            subjectId: doubt.subjectId ?? undefined,
+          }}
+          subjects={subjects}
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
     </div>
   );
 }

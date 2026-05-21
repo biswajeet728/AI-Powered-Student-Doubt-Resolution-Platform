@@ -143,3 +143,22 @@ body {
     @apply border-border outline-ring/50;
   }
 }
+
+/* Markdown editor overrides — match input bg-white/5 */
+.md-editor-override .w-md-editor {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.md-editor-override .w-md-editor-toolbar {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.md-editor-override .w-md-editor-toolbar button {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.md-editor-override .w-md-editor-toolbar button:hover {
+  color: white !important;
+}
+.md-editor-override .w-md-editor-content {
+  background-color: transparent !important;
+}
