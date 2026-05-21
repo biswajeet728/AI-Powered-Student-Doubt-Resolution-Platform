@@ -26,7 +26,9 @@ interface RecentDoubt {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   status: "OPEN" | "UNDER_REVIEW" | "RESOLVED";
   createdAt: Date;
+  aiResponseId: string | null;
   aiAnswer: string | null;
+  aiApproved: boolean;
   studentName: string;
   responseCount: number;
 }
@@ -298,7 +300,9 @@ export default function DoubtFeed({
                 difficulty: doubt.difficulty,
                 status: doubt.status,
                 createdAt: formatTimeAgo(doubt.createdAt),
+                aiResponseId: doubt.aiResponseId,
                 aiAnswer: doubt.aiAnswer,
+                aiApproved: doubt.aiApproved,
                 studentName: doubt.studentName,
               }}
               isTeacher={!isStudent}

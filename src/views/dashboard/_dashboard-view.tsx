@@ -21,7 +21,9 @@ interface RecentDoubt {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   status: "OPEN" | "UNDER_REVIEW" | "RESOLVED";
   createdAt: Date;
+  aiResponseId: string | null;
   aiAnswer: string | null;
+  aiApproved: boolean;
   studentName: string;
   responseCount: number;
 }

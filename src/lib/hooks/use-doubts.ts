@@ -33,6 +33,19 @@ export function useDoubtById(id: string) {
     queryKey: doubtKeys.detail(id),
     queryFn: () => getDoubtById(id),
     enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data?.success || !data.doubt) return false;
+      // Stop polling when resolved
+      if (data.doubt.status === "RESOLVED") return false;
+      // Stop polling once an AI response exists
+      const hasAiResponse = data.doubt.responses.some(
+        (r: { source: string }) => r.source === "AI",
+      );
+      if (hasAiResponse) return false;
+      // Poll every 3s while AI is generating
+      return 3000;
+    },
   });
 }
 
@@ -40,6 +53,7 @@ export function useRecentDoubts(limit = 10) {
   return useQuery({
     queryKey: doubtKeys.recent(limit),
     queryFn: () => getRecentDoubts(limit),
+    refetchInterval: 10000,
   });
 }
 

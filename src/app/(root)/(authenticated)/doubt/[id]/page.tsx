@@ -29,6 +29,7 @@ export default async function DoubtDetailPage({ params }: PageProps) {
       doubtId={id}
       initialDoubt={result.doubt!}
       currentUserId={result.currentUserId}
+      currentUserRole={session.user.role}
       subjects={subjects}
     />
   );

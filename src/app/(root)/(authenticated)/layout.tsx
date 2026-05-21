@@ -1,9 +1,14 @@
 import { getServerSession } from "@/lib/get-sessions";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSubjects } from "@/lib/actions/subject";
 import HeaderDashboard from "@/views/dashboard/_header-dashboard";
 import AskDoubtModal from "@/views/dashboard/_ask-doubt-modal";
 import AuthenticatedWrapper from "./_authenticated-wrapper";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default async function AuthenticatedLayout({
   children,

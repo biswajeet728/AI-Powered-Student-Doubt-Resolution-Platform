@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/get-sessions";
+import { inngest } from "@/inngest/client";
 
 export interface CreateDoubtInput {
   title: string;
@@ -30,6 +31,22 @@ export async function createDoubt(input: CreateDoubtInput) {
         subjectId: input.subjectId || null,
       },
     });
+
+    // Fire-and-forget: don't block doubt creation if Inngest is down
+    inngest
+      .send({
+        name: "doubt.created",
+        data: {
+          doubtId: doubt.id,
+          title: input.title.trim(),
+          body: input.body.trim(),
+          difficulty: input.difficulty,
+          subjectId: input.subjectId || null,
+        },
+      })
+      .catch((err) => {
+        console.error("Failed to send Inngest event:", err);
+      });
 
     return { success: true, doubtId: doubt.id };
   } catch (error) {
@@ -261,7 +278,7 @@ export async function getRecentDoubts(limit = 10) {
         responses: {
           where: { source: "AI" },
           take: 1,
-          select: { content: true },
+          select: { id: true, content: true, approved: true },
         },
         _count: { select: { responses: true } },
       },
@@ -276,7 +293,9 @@ export async function getRecentDoubts(limit = 10) {
       difficulty: d.difficulty,
       status: d.status,
       createdAt: d.createdAt,
+      aiResponseId: d.responses[0]?.id || null,
       aiAnswer: d.responses[0]?.content || null,
+      aiApproved: d.responses[0]?.approved || false,
       studentName: d.user.name,
       responseCount: d._count.responses,
     }));

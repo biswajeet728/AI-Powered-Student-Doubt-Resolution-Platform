@@ -7,7 +7,9 @@ export interface Doubt {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   status: "OPEN" | "UNDER_REVIEW" | "RESOLVED";
   createdAt: string;
+  aiResponseId: string | null;
   aiAnswer: string | null;
+  aiApproved: boolean;
   studentName: string;
 }
 
@@ -32,8 +34,10 @@ export const DUMMY_DOUBTS: Doubt[] = [
     difficulty: "EASY",
     status: "RESOLVED",
     createdAt: "2 days ago",
+    aiResponseId: "resp-1",
     aiAnswer:
       "Water molecules form a hexagonal lattice structure in ice due to hydrogen bonding, which actually takes up more space than the disordered arrangement in liquid water...",
+    aiApproved: true,
     studentName: "Rohan Mehta",
   },
   {
@@ -45,8 +49,10 @@ export const DUMMY_DOUBTS: Doubt[] = [
     difficulty: "HARD",
     status: "UNDER_REVIEW",
     createdAt: "1 day ago",
+    aiResponseId: "resp-2",
     aiAnswer:
       "Memoization is a top-down approach where you cache results of expensive recursive calls. In contrast, tabulation builds the solution from smaller sub-problems...",
+    aiApproved: false,
     studentName: "Ananya Shah",
   },
   {
@@ -58,7 +64,9 @@ export const DUMMY_DOUBTS: Doubt[] = [
     difficulty: "MEDIUM",
     status: "OPEN",
     createdAt: "3 hours ago",
+    aiResponseId: null,
     aiAnswer: null,
+    aiApproved: false,
     studentName: "Preet Kapoor",
   },
   {
@@ -70,7 +78,9 @@ export const DUMMY_DOUBTS: Doubt[] = [
     difficulty: "MEDIUM",
     status: "OPEN",
     createdAt: "5 hours ago",
+    aiResponseId: null,
     aiAnswer: null,
+    aiApproved: false,
     studentName: "Rohan Mehta",
   },
 ];
