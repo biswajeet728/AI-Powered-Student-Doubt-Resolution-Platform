@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   return (
     <DashboardView
       user={{ name: user.name, role: user.role }}
-      initialStats={stats ?? { total: 0, open: 0, resolved: 0, aiAnswers: 0 }}
+      initialStats={stats ?? { total: 0, open: 0, resolved: 0, aiAnswers: 0, pendingReview: 0 }}
       initialDoubts={recentDoubts}
     />
   );

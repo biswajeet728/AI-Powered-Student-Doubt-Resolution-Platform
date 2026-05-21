@@ -38,6 +38,7 @@ interface DashboardStats {
   open: number;
   resolved: number;
   aiAnswers: number;
+  pendingReview?: number;
 }
 
 interface DoubtFeedProps {
@@ -177,7 +178,7 @@ export default function DoubtFeed({
               <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
               <div>
                 <p className="font-mono text-sm font-semibold text-white">
-                  {stats?.open ?? 0} doubts need your review
+                  {stats?.pendingReview ?? stats?.open ?? 0} doubts need your review
                 </p>
                 <p className="font-mono text-xs text-white/40">
                   AI has answered — approve or override
@@ -224,7 +225,6 @@ export default function DoubtFeed({
               </div>
             </CardContent>
           </Card>
-
         </>
       )}
 
@@ -232,7 +232,11 @@ export default function DoubtFeed({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="font-mono text-sm font-semibold text-white">
-            {selectedSubject ? selectedSubject : isStudent ? "Recent Doubts" : "All Doubts"}
+            {selectedSubject
+              ? selectedSubject
+              : isStudent
+                ? "Recent Doubts"
+                : "All Doubts"}
             {activeFilter !== "ALL" && (
               <span className="ml-2 text-white/30 font-normal">
                 ({filteredDoubts.length})
@@ -240,20 +244,20 @@ export default function DoubtFeed({
             )}
           </h2>
           <div className="flex gap-1">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(f.key)}
-              className={`rounded-full px-3 py-1 font-mono text-xs transition-colors cursor-pointer ${
-                activeFilter === f.key
-                  ? "bg-amber-500/20 text-amber-400"
-                  : "text-white/40 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActiveFilter(f.key)}
+                className={`rounded-full px-3 py-1 font-mono text-xs transition-colors cursor-pointer ${
+                  activeFilter === f.key
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "text-white/40 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
         {selectedSubject && onClearSubject && (
           <div className="flex items-center gap-2">

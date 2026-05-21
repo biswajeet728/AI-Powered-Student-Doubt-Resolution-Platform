@@ -11,6 +11,7 @@ interface DashboardStats {
   open: number;
   resolved: number;
   aiAnswers: number;
+  pendingReview?: number;
 }
 
 interface RecentDoubt {
@@ -63,6 +64,7 @@ export default function DashboardView({
           <DoubtFeed
             isStudent={isStudent}
             doubts={filteredDoubts}
+            stats={stats}
             selectedSubject={selectedSubject}
             onClearSubject={() => setSelectedSubject(null)}
           />

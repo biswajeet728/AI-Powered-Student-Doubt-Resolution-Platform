@@ -411,24 +411,27 @@ export default function DoubtDetailView({
                           response.source === "AI" &&
                           doubt.status !== "RESOLVED" && (
                             <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
-                              <Button
-                                onClick={() => handleApprove(response.id)}
-                                disabled={approveMutation.isPending}
-                                size="sm"
-                                className="font-mono text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 cursor-pointer"
-                              >
-                                <HiOutlineCheckCircle className="mr-1 h-3 w-3" />
-                                Approve
-                              </Button>
-                              <Button
-                                onClick={() => handleDisapprove(response.id)}
-                                disabled={disapproveMutation.isPending}
-                                size="sm"
-                                className="font-mono text-xs bg-white/5 text-white/50 hover:bg-white/10 border border-white/10 cursor-pointer"
-                              >
-                                <HiOutlineXCircle className="mr-1 h-3 w-3" />
-                                Disapprove
-                              </Button>
+                              {!response.approved ? (
+                                <Button
+                                  onClick={() => handleApprove(response.id)}
+                                  disabled={approveMutation.isPending}
+                                  size="sm"
+                                  className="font-mono text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 cursor-pointer"
+                                >
+                                  <HiOutlineCheckCircle className="mr-1 h-3 w-3" />
+                                  Approve
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() => handleDisapprove(response.id)}
+                                  disabled={disapproveMutation.isPending}
+                                  size="sm"
+                                  className="font-mono text-xs bg-white/5 text-white/50 hover:bg-white/10 border border-white/10 cursor-pointer"
+                                >
+                                  <HiOutlineXCircle className="mr-1 h-3 w-3" />
+                                  Disapprove
+                                </Button>
+                              )}
                             </div>
                           )}
 

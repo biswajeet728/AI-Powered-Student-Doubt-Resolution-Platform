@@ -248,7 +248,7 @@ export async function getDashboardStats() {
   try {
     const where = isStudent ? { userId: session.user.id } : {};
 
-    const [total, open, resolved, responses] = await Promise.all([
+    const [total, open, resolved, responses, pendingReview] = await Promise.all([
       prisma.doubt.count({ where }),
       prisma.doubt.count({ where: { ...where, status: "OPEN" } }),
       prisma.doubt.count({ where: { ...where, status: "RESOLVED" } }),
@@ -257,9 +257,15 @@ export async function getDashboardStats() {
           ? { doubt: { userId: session.user.id }, source: "AI" }
           : { source: "AI" },
       }),
+      // For teachers: count OPEN + UNDER_REVIEW as pending
+      isStudent
+        ? Promise.resolve(0)
+        : prisma.doubt.count({
+            where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
+          }),
     ]);
 
-    return { total, open, resolved, aiAnswers: responses };
+    return { total, open, resolved, aiAnswers: responses, pendingReview };
   } catch (error) {
     console.error("Failed to fetch stats:", error);
     return { total: 0, open: 0, resolved: 0, aiAnswers: 0 };
