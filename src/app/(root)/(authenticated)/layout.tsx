@@ -8,6 +8,8 @@ import AuthenticatedWrapper from "./_authenticated-wrapper";
 
 export const metadata: Metadata = {
   title: "Dashboard",
+  description:
+    "Your personalized dashboard to manage your doubts and interactions.",
 };
 
 export default async function AuthenticatedLayout({
@@ -34,7 +36,9 @@ export default async function AuthenticatedLayout({
         image: user.image ?? null,
       }}
       header={<HeaderDashboard />}
-      modal={user.role === "STUDENT" ? <AskDoubtModal subjects={subjects} /> : null}
+      modal={
+        user.role === "STUDENT" ? <AskDoubtModal subjects={subjects} /> : null
+      }
     >
       {children}
     </AuthenticatedWrapper>
