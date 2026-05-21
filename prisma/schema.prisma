@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  emailVerified  Boolean   @default(true)
+  role           Role      @default(STUDENT)
+  image          String?
+  doubts         Doubt[]
+  responses      Response[]
+  accounts       Account[]
+  sessions       Session[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("user")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  accountId         String
+  providerId        String
+  userId            String
+  password          String?
+  accessToken       String?
+  refreshToken      String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope             String?
+  idToken           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  expiresAt    DateTime
+  token        String   @unique
+  ipAddress    String?
+  userAgent    String?
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  doubts      Doubt[]
+  createdAt   DateTime @default(now())
+
+  @@map("subject")
+}
+
+model Doubt {
+  id         String     @id @default(uuid())
+  title      String
+  body       String
+  status     Status     @default(OPEN)
+  difficulty Difficulty @default(MEDIUM)
+  userId     String
+  subjectId  String?
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject    Subject?   @relation(fields: [subjectId], references: [id])
+  responses  Response[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("doubt")
+}
+
+model Response {
+  id        String       @id @default(uuid())
+  content   String       @db.Text
+  source    ResponseType @default(AI)
+  approved  Boolean      @default(false)
+  doubtId   String
+  userId    String?
+  doubt     Doubt        @relation(fields: [doubtId], references: [id], onDelete: Cascade)
+  user      User?        @relation(fields: [userId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("response")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+enum Status {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ResponseType {
+  AI
+  TEACHER
+}

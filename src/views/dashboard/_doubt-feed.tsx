@@ -1,0 +1,285 @@
+"use client";
+
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  HiOutlineSparkles,
+  HiOutlineClock,
+  HiOutlineCheckCircle,
+  HiOutlineChatBubbleLeftRight,
+  HiOutlinePencilSquare,
+  HiOutlineChevronRight,
+  HiOutlineTag,
+  HiOutlineBookOpen,
+} from "react-icons/hi2";
+import DoubtFeedCard from "./_doubt-feed-card";
+import { DUMMY_TAGS } from "./_dashboard-data";
+
+interface RecentDoubt {
+  id: string;
+  title: string;
+  body: string;
+  subject: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  status: "OPEN" | "UNDER_REVIEW" | "RESOLVED";
+  createdAt: Date;
+  aiAnswer: string | null;
+  studentName: string;
+  responseCount: number;
+}
+
+interface DashboardStats {
+  total: number;
+  open: number;
+  resolved: number;
+  aiAnswers: number;
+}
+
+interface DoubtFeedProps {
+  isStudent: boolean;
+  showStats?: boolean;
+  showFilters?: boolean;
+  doubts: RecentDoubt[];
+  stats?: DashboardStats;
+}
+
+export default function DoubtFeed({
+  isStudent,
+  showStats,
+  showFilters,
+  doubts,
+  stats,
+}: DoubtFeedProps) {
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Stats row — mobile/tablet only */}
+      {showStats && stats && (
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            {
+              icon: <HiOutlineSparkles className="h-4 w-4 text-amber-400" />,
+              bg: "bg-amber-500/15",
+              label: "Total",
+              value: String(stats.total),
+            },
+            {
+              icon: <HiOutlineClock className="h-4 w-4 text-blue-400" />,
+              bg: "bg-blue-500/15",
+              label: "Open",
+              value: String(stats.open),
+            },
+            {
+              icon: <HiOutlineCheckCircle className="h-4 w-4 text-green-400" />,
+              bg: "bg-green-500/15",
+              label: "Resolved",
+              value: String(stats.resolved),
+            },
+            {
+              icon: (
+                <HiOutlineChatBubbleLeftRight className="h-4 w-4 text-purple-400" />
+              ),
+              bg: "bg-purple-500/15",
+              label: "AI Answers",
+              value: String(stats.aiAnswers),
+            },
+          ].map((stat, i) => (
+            <Card
+              key={i}
+              className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm"
+            >
+              <CardContent className="flex flex-col items-center gap-1.5 p-3 text-center">
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.bg}`}
+                >
+                  {stat.icon}
+                </div>
+                <p className="font-mono text-lg font-bold text-white leading-none">
+                  {stat.value}
+                </p>
+                <p className="font-mono text-[10px] text-white/40">
+                  {stat.label}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Post doubt form — students only */}
+      {isStudent && (
+        <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <HiOutlinePencilSquare className="h-4 w-4 text-amber-400" />
+              <span className="font-mono text-base font-semibold text-white">
+                Ask a new doubt
+              </span>
+              <small
+                className="font-mono text-xs text-white/30 ml-auto"
+                title="Keyboard Shortcut"
+              >
+                ALT + Q to Post it Quickly
+              </small>
+            </div>
+            <Link href="/dashboard/ask">
+              <div className="cursor-pointer rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white/30 hover:border-amber-500/30 hover:bg-white/8 transition-colors">
+                What&apos;s your doubt? Be specific...
+              </div>
+            </Link>
+            <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <span className="font-mono text-xs text-white/30">
+                AI will answer instantly after posting
+              </span>
+              <Link href="/dashboard/ask">
+                <Button
+                  size="sm"
+                  className="font-mono text-xs bg-amber-500 text-black hover:bg-amber-400 py-4 cursor-pointer"
+                >
+                  <HiOutlineSparkles className="mr-1.5 h-3.5 w-3.5" />
+                  Post &amp; Get AI Answer
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Teacher pending banner */}
+      {!isStudent && (
+        <Card className="border-amber-500/20 bg-amber-500/5 backdrop-blur-sm">
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              <div>
+                <p className="font-mono text-sm font-semibold text-white">
+                  {stats?.open ?? 0} doubts need your review
+                </p>
+                <p className="font-mono text-xs text-white/40">
+                  AI has answered — approve or override
+                </p>
+              </div>
+            </div>
+            <Link href="/teacher/review">
+              <Button
+                size="sm"
+                className="font-mono text-xs bg-amber-500 text-black hover:bg-amber-400 cursor-pointer"
+              >
+                Review Now
+                <HiOutlineChevronRight className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Filters — mobile only */}
+      {showFilters && (
+        <>
+          {/* Tags */}
+          <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <HiOutlineTag className="h-4 w-4 text-amber-400" />
+                <span className="font-mono text-xs font-semibold text-white">
+                  Tags
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {DUMMY_TAGS.slice(0, 5).map((tag) => (
+                  <button
+                    key={tag.label}
+                    className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-white/50 hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-300 cursor-pointer"
+                  >
+                    {tag.label}
+                    <span className="rounded-full bg-white/10 px-1 text-[10px] text-white/30">
+                      {tag.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subjects placeholder — real data from RightSidebar */}
+        </>
+      )}
+
+      {/* Feed header */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-mono text-sm font-semibold text-white">
+          {isStudent ? "Recent Doubts" : "All Doubts"}
+        </h2>
+        <div className="flex gap-1">
+          {["All", "Open", "Resolved"].map((f, i) => (
+            <button
+              key={f}
+              className={`rounded-full px-3 py-1 font-mono text-xs transition-colors cursor-pointer ${
+                i === 0
+                  ? "bg-amber-500/20 text-amber-400"
+                  : "text-white/40 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Doubt cards */}
+      {doubts.length === 0 ? (
+        <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <HiOutlineSparkles className="mb-3 h-10 w-10 text-white/15" />
+            <p className="font-mono text-sm text-white/40">
+              No doubts posted yet
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {doubts.map((doubt) => (
+            <DoubtFeedCard
+              key={doubt.id}
+              doubt={{
+                id: doubt.id,
+                title: doubt.title,
+                body: doubt.body,
+                subject: doubt.subject,
+                tags: [],
+                difficulty: doubt.difficulty,
+                status: doubt.status,
+                createdAt: formatTimeAgo(doubt.createdAt),
+                aiAnswer: doubt.aiAnswer,
+                studentName: doubt.studentName,
+              }}
+              isTeacher={!isStudent}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* View all */}
+      <Link href="/my-doubts" className="block">
+        <Button
+          variant="ghost"
+          className="w-full font-mono text-xs text-white/40 hover:text-white hover:bg-white/5 cursor-pointer"
+        >
+          View all doubts
+          <HiOutlineChevronRight className="ml-1 h-3.5 w-3.5" />
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
+function formatTimeAgo(date: Date) {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
