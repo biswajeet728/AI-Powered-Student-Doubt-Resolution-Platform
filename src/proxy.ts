@@ -16,6 +16,11 @@ function isRoute(pathname: string, routes: string[]) {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Allow Inngest
+  if (pathname.startsWith("/api/inngest")) {
+    return NextResponse.next();
+  }
+
   const session = await auth.api.getSession({
     headers: request.headers,
   });
