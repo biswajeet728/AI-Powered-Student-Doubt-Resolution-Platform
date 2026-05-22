@@ -39,6 +39,12 @@ export default function AuthForms({ mode }: AuthFormsProps) {
 
     try {
       if (isSignUp) {
+        if (!name || !email || !password) {
+          toast.error("Please fill in all fields");
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signUp.email(
           {
             name,
@@ -59,6 +65,12 @@ export default function AuthForms({ mode }: AuthFormsProps) {
           router.push("/dashboard");
         }
       } else {
+        if (!email || !password) {
+          toast.error("Please fill in all fields");
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signIn.email({
           email,
           password,
@@ -236,6 +248,33 @@ export default function AuthForms({ mode }: AuthFormsProps) {
               {isSignUp ? "Sign in" : "Sign up"}
             </Link>
           </p>
+
+          {/* show testing credentials for STUDENT and TEACHER role */}
+          <div className="mt-8 rounded-md bg-white/5 p-4 text-sm text-white/50">
+            <p className="font-mono mb-2 text-xs uppercase text-amber-400">
+              Testing Credentials
+            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="font-mono font-medium text-white">Student</p>
+                <p className="font-mono text-xs text-white/50">
+                  Email: student@gmail.com
+                </p>
+                <p className="font-mono text-xs text-white/50">
+                  Password: student123456
+                </p>
+              </div>
+              <div>
+                <p className="font-mono font-medium text-white">Teacher</p>
+                <p className="font-mono text-xs text-white/50">
+                  Email: teacher@gmail.com
+                </p>
+                <p className="font-mono text-xs text-white/50">
+                  Password: teacher123456
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

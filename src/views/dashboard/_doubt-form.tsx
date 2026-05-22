@@ -21,14 +21,16 @@ export default function DoubtForm({ subjects, onSuccess }: DoubtFormProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [subjectId, setSubjectId] = useState("");
-  const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">("MEDIUM");
+  const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">(
+    "MEDIUM",
+  );
 
   const createDoubtMutation = useCreateDoubt();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !body.trim()) {
-      toast.error("Title and body are required");
+    if (!title.trim() || !body.trim() || !subjectId) {
+      toast.error("Title, body, and subject are required");
       return;
     }
 
@@ -61,7 +63,10 @@ export default function DoubtForm({ subjects, onSuccess }: DoubtFormProps) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="modal-title" className="font-mono text-sm text-white/70">
+        <Label
+          htmlFor="modal-title"
+          className="font-mono text-sm text-white/70"
+        >
           Title
         </Label>
         <Input
@@ -76,9 +81,7 @@ export default function DoubtForm({ subjects, onSuccess }: DoubtFormProps) {
 
       {/* Body — Markdown Editor */}
       <div className="space-y-2">
-        <Label className="font-mono text-sm text-white/70">
-          Description
-        </Label>
+        <Label className="font-mono text-sm text-white/70">Description</Label>
         <MarkdownEditor
           value={body}
           onChange={setBody}
@@ -89,7 +92,10 @@ export default function DoubtForm({ subjects, onSuccess }: DoubtFormProps) {
 
       {/* Subject */}
       <div className="space-y-2">
-        <Label htmlFor="modal-subject" className="font-mono text-sm text-white/70">
+        <Label
+          htmlFor="modal-subject"
+          className="font-mono text-sm text-white/70"
+        >
           Subject
         </Label>
         <select
@@ -123,8 +129,8 @@ export default function DoubtForm({ subjects, onSuccess }: DoubtFormProps) {
                   ? d === "EASY"
                     ? "border-green-500/50 bg-green-500/15 text-green-400"
                     : d === "MEDIUM"
-                    ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                    : "border-red-500/50 bg-red-500/15 text-red-400"
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                      : "border-red-500/50 bg-red-500/15 text-red-400"
                   : "border-white/10 bg-white/5 text-white/40 hover:bg-white/10"
               }`}
             >

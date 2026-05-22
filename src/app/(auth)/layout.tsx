@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to Doubt-Flow to ask doubts and get AI-powered answers.",
+  description:
+    "Sign in to Doubt-Flow to ask doubts and get AI-powered answers.",
 };
 
 export default async function AuthLayout({
