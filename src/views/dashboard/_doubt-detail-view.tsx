@@ -170,17 +170,17 @@ export default function DoubtDetailView({
     }
   };
 
-  const handleResolve = async () => {
-    const res = await updateMutation.mutateAsync({
-      doubtId: doubt.id,
-      status: "RESOLVED",
-    });
-    if (res.success) {
-      toast.success("Marked as resolved!");
-    } else {
-      toast.error(res.error || "Failed to update");
-    }
-  };
+  // const handleResolve = async () => {
+  //   const res = await updateMutation.mutateAsync({
+  //     doubtId: doubt.id,
+  //     status: "RESOLVED",
+  //   });
+  //   if (res.success) {
+  //     toast.success("Marked as resolved!");
+  //   } else {
+  //     toast.error(res.error || "Failed to update");
+  //   }
+  // };
 
   const handleApprove = async (responseId: string) => {
     const res = await approveMutation.mutateAsync(responseId);
@@ -255,7 +255,7 @@ export default function DoubtDetailView({
                           <HiOutlinePencilSquare className="h-4 w-4" />
                         </button>
                       )} */}
-                      {doubt.status !== "RESOLVED" && (
+                      {/* {doubt.status !== "RESOLVED" && (
                         <button
                           onClick={handleResolve}
                           disabled={updateMutation.isPending}
@@ -264,7 +264,7 @@ export default function DoubtDetailView({
                         >
                           <HiOutlineCheckCircle className="h-4 w-4" />
                         </button>
-                      )}
+                      )} */}
                       <button
                         onClick={handleDelete}
                         disabled={deleteMutation.isPending}
@@ -277,7 +277,7 @@ export default function DoubtDetailView({
                   )}
 
                   {/* Teacher resolve */}
-                  {isTeacher && !isOwner && doubt.status !== "RESOLVED" && (
+                  {/* {
                     <button
                       onClick={handleResolve}
                       disabled={updateMutation.isPending}
@@ -286,7 +286,7 @@ export default function DoubtDetailView({
                     >
                       <HiOutlineCheckCircle className="h-4 w-4" />
                     </button>
-                  )}
+                  } */}
                 </div>
               </div>
 
@@ -363,24 +363,18 @@ export default function DoubtDetailView({
                       const effectivelyApproved =
                         response.approved || isAutoApprovedResponse;
                       const displayContent = isDisapproved
-                        ? response.content.replace(
-                            "__DISAPPROVED__:",
-                            "",
-                          )
+                        ? response.content.replace("__DISAPPROVED__:", "")
                         : response.content;
 
                       // Border color
                       let borderColor = "border-amber-500/20 bg-amber-500/5";
                       if (response.source === "AI") {
                         if (isDisapproved) {
-                          borderColor =
-                            "border-red-500/20 bg-red-500/5";
+                          borderColor = "border-red-500/20 bg-red-500/5";
                         } else if (effectivelyApproved) {
-                          borderColor =
-                            "border-green-500/30 bg-green-500/5";
+                          borderColor = "border-green-500/30 bg-green-500/5";
                         } else {
-                          borderColor =
-                            "border-purple-500/20 bg-purple-500/5";
+                          borderColor = "border-purple-500/20 bg-purple-500/5";
                         }
                       }
 
@@ -417,9 +411,7 @@ export default function DoubtDetailView({
                                 <AIResponseBadge
                                   approved={response.approved}
                                   disapproved={isDisapproved}
-                                  createdAt={
-                                    new Date(response.createdAt)
-                                  }
+                                  createdAt={new Date(response.createdAt)}
                                   onAutoApprove={() =>
                                     autoApproveResponse(response.id)
                                   }
@@ -435,18 +427,15 @@ export default function DoubtDetailView({
                           {isDisapproved && !isTeacher ? (
                             <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center">
                               <p className="font-mono text-xs font-medium text-red-400">
-                                This AI answer was reviewed and not
-                                approved by a teacher
+                                This AI answer was reviewed and not approved by
+                                a teacher
                               </p>
                               <p className="font-mono text-[10px] text-white/60 mt-1">
-                                A teacher will provide their own
-                                response soon
+                                A teacher will provide their own response soon
                               </p>
                             </div>
                           ) : (
-                            <MarkdownRenderer
-                              content={displayContent}
-                            />
+                            <MarkdownRenderer content={displayContent} />
                           )}
 
                           {/* Warning badge for unapproved, non-auto-approved AI */}
@@ -455,9 +444,8 @@ export default function DoubtDetailView({
                             !isDisapproved && (
                               <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5">
                                 <p className="font-mono text-[10px] text-amber-400 text-center">
-                                  This answer is generated by
-                                  Doubt-Flow AI and has not been
-                                  verified yet
+                                  This answer is generated by Doubt-Flow AI and
+                                  has not been verified yet
                                 </p>
                               </div>
                             )}
@@ -469,12 +457,8 @@ export default function DoubtDetailView({
                               <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
                                 {!effectivelyApproved ? (
                                   <Button
-                                    onClick={() =>
-                                      handleApprove(response.id)
-                                    }
-                                    disabled={
-                                      approveMutation.isPending
-                                    }
+                                    onClick={() => handleApprove(response.id)}
+                                    disabled={approveMutation.isPending}
                                     size="sm"
                                     className="font-mono text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 cursor-pointer"
                                   >
@@ -486,9 +470,7 @@ export default function DoubtDetailView({
                                     onClick={() =>
                                       handleDisapprove(response.id)
                                     }
-                                    disabled={
-                                      disapproveMutation.isPending
-                                    }
+                                    disabled={disapproveMutation.isPending}
                                     size="sm"
                                     className="font-mono text-xs bg-white/5 text-white/50 hover:bg-white/10 border border-white/10 cursor-pointer"
                                   >
