@@ -21,6 +21,8 @@ export default function HomeHeader() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
+  const isTeacher = (session?.user as any)?.role === "TEACHER";
+
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
@@ -62,13 +64,24 @@ export default function HomeHeader() {
                   <HiOutlineUser className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => router.push("/my-doubts")}
-                  className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-                >
-                  <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
-                  My Doubts
-                </DropdownMenuItem>
+                {isTeacher && (
+                  <DropdownMenuItem
+                    onClick={() => router.push("/teacher/review")}
+                    className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                  >
+                    <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+                    Review Doubts
+                  </DropdownMenuItem>
+                )}
+                {!isTeacher && (
+                  <DropdownMenuItem
+                    onClick={() => router.push("/my-doubts")}
+                    className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                  >
+                    <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+                    My Doubts
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuItem
                   onClick={handleSignOut}

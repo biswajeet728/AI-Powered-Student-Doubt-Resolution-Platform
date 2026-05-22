@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSubjects } from "@/lib/actions/subject";
 import HeaderDashboard from "@/views/dashboard/_header-dashboard";
+import FooterDashboard from "@/views/dashboard/_footer-dashboard";
 import AskDoubtModal from "@/views/dashboard/_ask-doubt-modal";
 import AuthenticatedWrapper from "./_authenticated-wrapper";
 
@@ -38,6 +39,7 @@ export default async function AuthenticatedLayout({
         image: user.image ?? null,
       }}
       header={<HeaderDashboard />}
+      footer={<FooterDashboard />}
       modal={
         user.role === "STUDENT" ? <AskDoubtModal subjects={subjects} /> : null
       }

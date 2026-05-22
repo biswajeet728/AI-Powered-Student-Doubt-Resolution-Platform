@@ -11,6 +11,7 @@ interface AuthenticatedWrapperProps {
     image: string | null;
   };
   header: React.ReactNode;
+  footer: React.ReactNode;
   children: React.ReactNode;
   modal: React.ReactNode;
 }
@@ -18,6 +19,7 @@ interface AuthenticatedWrapperProps {
 export default function AuthenticatedWrapper({
   initialUser,
   header,
+  footer,
   children,
   modal,
 }: AuthenticatedWrapperProps) {
@@ -25,6 +27,7 @@ export default function AuthenticatedWrapper({
     <UserProvider initialUser={initialUser}>
       {header}
       <main className="min-h-screen">{children}</main>
+      {footer}
       {modal}
     </UserProvider>
   );
