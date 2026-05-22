@@ -284,7 +284,7 @@ export async function getRecentDoubts(limit = 10) {
         responses: {
           where: { source: "AI" },
           take: 1,
-          select: { id: true, content: true, approved: true },
+          select: { id: true, content: true, approved: true, createdAt: true },
         },
         _count: { select: { responses: true } },
       },
@@ -302,6 +302,7 @@ export async function getRecentDoubts(limit = 10) {
       aiResponseId: d.responses[0]?.id || null,
       aiAnswer: d.responses[0]?.content || null,
       aiApproved: d.responses[0]?.approved || false,
+      aiResponseCreatedAt: d.responses[0]?.createdAt || null,
       studentName: d.user.name,
       responseCount: d._count.responses,
     }));

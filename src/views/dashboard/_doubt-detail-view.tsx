@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -17,7 +17,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import EditDoubtModal from "./_edit-doubt-modal";
 import EditResponseModal from "./_edit-response-modal";
+import AIResponseBadge from "./_ai-response-badge";
 import TeacherResponseForm from "@/views/teacher/_teacher-response-form";
+import { isAutoApproved } from "@/lib/config/ai";
 import {
   HiOutlineArrowLeft,
   HiOutlineSparkles,
@@ -104,6 +106,11 @@ export default function DoubtDetailView({
     content: string;
   } | null>(null);
 
+  // Track which AI responses have been auto-approved (triggers re-render)
+  const [autoApprovedIds, setAutoApprovedIds] = useState<Set<string>>(
+    new Set(),
+  );
+
   const { data: result } = useDoubtById(doubtId);
   const updateMutation = useUpdateDoubtStatus();
   const deleteMutation = useDeleteDoubt();
@@ -116,6 +123,30 @@ export default function DoubtDetailView({
   const isAiGenerating =
     doubt.status !== "RESOLVED" &&
     !doubt.responses.some((r) => r.source === "AI");
+
+  // Check for auto-approved responses every second
+  useEffect(() => {
+    const check = () => {
+      const newIds = new Set<string>();
+      doubt.responses.forEach((r) => {
+        if (
+          r.source === "AI" &&
+          !r.approved &&
+          !r.content.startsWith("__DISAPPROVED__:") &&
+          isAutoApproved(r.createdAt as unknown as Date)
+        ) {
+          newIds.add(r.id);
+        }
+      });
+      setAutoApprovedIds((prev) => {
+        if (prev.size === newIds.size) return prev;
+        return newIds;
+      });
+    };
+    check();
+    const interval = setInterval(check, 1000);
+    return () => clearInterval(interval);
+  }, [doubt.responses]);
 
   const isOwner = doubt.user.id === currentUserId;
   const isTeacher = currentUserRole === "TEACHER";
@@ -313,152 +344,176 @@ export default function DoubtDetailView({
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
-                    {doubt.responses.map((response) => (
-                      <div
-                        key={response.id}
-                        className={`rounded-lg border p-3.5 ${
-                          response.approved
-                            ? "border-green-500/30 bg-green-500/5"
-                            : response.source === "AI"
-                              ? "border-purple-500/20 bg-purple-500/5"
-                              : "border-amber-500/20 bg-amber-500/5"
-                        }`}
-                      >
-                        {/* Response header */}
-                        <div className="flex items-center justify-between mb-2.5">
-                          <div className="flex items-center gap-2">
-                            {response.source === "AI" ? (
-                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500/20">
-                                <HiOutlineSparkles className="h-3 w-3 text-purple-400" />
-                              </div>
-                            ) : (
-                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
-                                <HiOutlineAcademicCap className="h-3 w-3 text-amber-400" />
-                              </div>
-                            )}
-                            <span className="font-mono text-xs font-medium text-white">
-                              {response.source === "AI"
-                                ? "AI Assistant"
-                                : response.user?.name}
-                            </span>
-                            {response.source === "TEACHER" && (
-                              <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] text-amber-400">
-                                Teacher
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {response.approved && (
-                              <span className="flex items-center gap-1 rounded-full bg-green-500/15 px-1.5 py-0.5 font-mono text-[10px] text-green-400">
-                                <HiOutlineCheckCircle className="h-2.5 w-2.5" />
-                                Approved
-                              </span>
-                            )}
-                            <span className="font-mono text-[10px] text-white/20">
-                              {formatDate(response.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Response content */}
-                        {!isTeacher &&
+                    {doubt.responses.map((response) => {
+                      const isDisapproved =
+                        response.source === "AI" &&
+                        response.content.startsWith("__DISAPPROVED__:");
+                      const isAutoApprovedResponse =
                         response.source === "AI" &&
                         !response.approved &&
-                        response.content.startsWith("__DISAPPROVED__:") ? (
-                          /* Disapproved state */
-                          <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center">
-                            <p className="font-mono text-xs font-medium text-red-400">
-                              This AI answer was reviewed and not approved by a
-                              teacher
-                            </p>
-                            <p className="font-mono text-[10px] text-white/60 mt-1">
-                              A teacher will provide their own response soon
-                            </p>
-                          </div>
-                        ) : !isTeacher &&
-                          response.source === "AI" &&
-                          !response.approved ? (
-                          /* Pending approval state */
-                          <div className="relative">
-                            <div className="max-h-20 overflow-hidden">
-                              <MarkdownRenderer content={response.content} />
-                            </div>
-                            <div className="absolute inset-0 bg-linear-to-b from-transparent from-40% to-[#2a2826]/95 pointer-events-none" />
-                            <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-center">
-                              <p className="font-mono text-xs text-amber-400">
-                                This answer is generated by Doubt-Flow AI
-                              </p>
-                              <p className="font-mono text-[10px] text-white mt-1">
-                                A teacher will verify and approve it soon
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <MarkdownRenderer
-                            content={
-                              response.content.startsWith("__DISAPPROVED__:")
-                                ? response.content.replace(
-                                    "__DISAPPROVED__:",
-                                    "",
-                                  )
-                                : response.content
-                            }
-                          />
-                        )}
+                        !isDisapproved &&
+                        autoApprovedIds.has(response.id);
+                      const effectivelyApproved =
+                        response.approved || isAutoApprovedResponse;
+                      const displayContent = isDisapproved
+                        ? response.content.replace(
+                            "__DISAPPROVED__:",
+                            "",
+                          )
+                        : response.content;
 
-                        {/* Teacher actions on AI responses */}
-                        {isTeacher &&
-                          response.source === "AI" &&
-                          doubt.status !== "RESOLVED" && (
-                            <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
-                              {!response.approved ? (
-                                <Button
-                                  onClick={() => handleApprove(response.id)}
-                                  disabled={approveMutation.isPending}
-                                  size="sm"
-                                  className="font-mono text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 cursor-pointer"
-                                >
-                                  <HiOutlineCheckCircle className="mr-1 h-3 w-3" />
-                                  Approve
-                                </Button>
+                      // Border color
+                      let borderColor = "border-amber-500/20 bg-amber-500/5";
+                      if (response.source === "AI") {
+                        if (isDisapproved) {
+                          borderColor =
+                            "border-red-500/20 bg-red-500/5";
+                        } else if (effectivelyApproved) {
+                          borderColor =
+                            "border-green-500/30 bg-green-500/5";
+                        } else {
+                          borderColor =
+                            "border-purple-500/20 bg-purple-500/5";
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={response.id}
+                          className={`rounded-lg border p-3.5 ${borderColor}`}
+                        >
+                          {/* Response header */}
+                          <div className="flex items-center justify-between mb-2.5">
+                            <div className="flex items-center gap-2">
+                              {response.source === "AI" ? (
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500/20">
+                                  <HiOutlineSparkles className="h-3 w-3 text-purple-400" />
+                                </div>
                               ) : (
-                                <Button
-                                  onClick={() => handleDisapprove(response.id)}
-                                  disabled={disapproveMutation.isPending}
-                                  size="sm"
-                                  className="font-mono text-xs bg-white/5 text-white/50 hover:bg-white/10 border border-white/10 cursor-pointer"
-                                >
-                                  <HiOutlineXCircle className="mr-1 h-3 w-3" />
-                                  Disapprove
-                                </Button>
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
+                                  <HiOutlineAcademicCap className="h-3 w-3 text-amber-400" />
+                                </div>
+                              )}
+                              <span className="font-mono text-xs font-medium text-white">
+                                {response.source === "AI"
+                                  ? "AI Assistant"
+                                  : response.user?.name}
+                              </span>
+                              {response.source === "TEACHER" && (
+                                <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] text-amber-400">
+                                  Teacher
+                                </span>
                               )}
                             </div>
-                          )}
-
-                        {/* Edit button for own teacher responses */}
-                        {isTeacher &&
-                          response.source === "TEACHER" &&
-                          response.user?.id === currentUserId && (
-                            <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
-                              <Button
-                                onClick={() =>
-                                  setEditingResponse({
-                                    id: response.id,
-                                    content: response.content,
-                                  })
-                                }
-                                size="sm"
-                                className="font-mono text-xs bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 cursor-pointer"
-                              >
-                                <HiOutlinePencilSquare className="mr-1 h-3 w-3" />
-                                Edit
-                              </Button>
+                            <div className="flex items-center gap-2">
+                              {response.source === "AI" && (
+                                <AIResponseBadge
+                                  approved={response.approved}
+                                  disapproved={isDisapproved}
+                                  createdAt={
+                                    new Date(response.createdAt)
+                                  }
+                                />
+                              )}
+                              <span className="font-mono text-[10px] text-white/20">
+                                {formatDate(response.createdAt)}
+                              </span>
                             </div>
-                          )}
-                      </div>
-                    ))}
+                          </div>
 
-                    {/* AI loading indicator — shown below responses while AI is generating */}
+                          {/* Response content */}
+                          {isDisapproved && !isTeacher ? (
+                            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center">
+                              <p className="font-mono text-xs font-medium text-red-400">
+                                This AI answer was reviewed and not
+                                approved by a teacher
+                              </p>
+                              <p className="font-mono text-[10px] text-white/60 mt-1">
+                                A teacher will provide their own
+                                response soon
+                              </p>
+                            </div>
+                          ) : (
+                            <MarkdownRenderer
+                              content={displayContent}
+                            />
+                          )}
+
+                          {/* Warning badge for unapproved, non-auto-approved AI */}
+                          {response.source === "AI" &&
+                            !effectivelyApproved &&
+                            !isDisapproved && (
+                              <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5">
+                                <p className="font-mono text-[10px] text-amber-400 text-center">
+                                  This answer is generated by
+                                  Doubt-Flow AI and has not been
+                                  verified yet
+                                </p>
+                              </div>
+                            )}
+
+                          {/* Teacher actions on AI responses */}
+                          {isTeacher &&
+                            response.source === "AI" &&
+                            doubt.status !== "RESOLVED" && (
+                              <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
+                                {!effectivelyApproved ? (
+                                  <Button
+                                    onClick={() =>
+                                      handleApprove(response.id)
+                                    }
+                                    disabled={
+                                      approveMutation.isPending
+                                    }
+                                    size="sm"
+                                    className="font-mono text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 cursor-pointer"
+                                  >
+                                    <HiOutlineCheckCircle className="mr-1 h-3 w-3" />
+                                    Approve
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    onClick={() =>
+                                      handleDisapprove(response.id)
+                                    }
+                                    disabled={
+                                      disapproveMutation.isPending
+                                    }
+                                    size="sm"
+                                    className="font-mono text-xs bg-white/5 text-white/50 hover:bg-white/10 border border-white/10 cursor-pointer"
+                                  >
+                                    <HiOutlineXCircle className="mr-1 h-3 w-3" />
+                                    Disapprove
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+
+                          {/* Edit button for own teacher responses */}
+                          {isTeacher &&
+                            response.source === "TEACHER" &&
+                            response.user?.id === currentUserId && (
+                              <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-white/5">
+                                <Button
+                                  onClick={() =>
+                                    setEditingResponse({
+                                      id: response.id,
+                                      content: response.content,
+                                    })
+                                  }
+                                  size="sm"
+                                  className="font-mono text-xs bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 cursor-pointer"
+                                >
+                                  <HiOutlinePencilSquare className="mr-1 h-3 w-3" />
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                        </div>
+                      );
+                    })}
+
+                    {/* AI loading indicator */}
                     {isAiGenerating && (
                       <div className="flex items-center gap-3 rounded-lg border border-purple-500/20 bg-purple-500/5 p-3">
                         <div className="relative h-8 w-8 shrink-0">

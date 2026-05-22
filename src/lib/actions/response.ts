@@ -163,7 +163,7 @@ export async function updateResponse(responseId: string, content: string) {
 
 // ── Get Doubts for Review Queue ──────────────────────────────────────
 export async function getDoubtsForReview(
-  status?: "OPEN" | "UNDER_REVIEW",
+  status?: "OPEN" | "UNDER_REVIEW" | "RESOLVED",
 ) {
   const session = await getServerSession();
   if (!session?.user || session.user.role !== "TEACHER") {
@@ -172,7 +172,7 @@ export async function getDoubtsForReview(
 
   try {
     const where: Record<string, unknown> = {
-      ...(status ? { status } : { status: { in: ["OPEN", "UNDER_REVIEW"] } }),
+      ...(status ? { status } : {}),
     };
 
     const doubts = await prisma.doubt.findMany({

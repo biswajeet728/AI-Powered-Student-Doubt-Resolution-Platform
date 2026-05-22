@@ -77,7 +77,7 @@ export default function ReviewView({
   initialStats,
 }: ReviewViewProps) {
   const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "OPEN" | "UNDER_REVIEW"
+    "ALL" | "OPEN" | "UNDER_REVIEW" | "RESOLVED"
   >("ALL");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -155,7 +155,7 @@ export default function ReviewView({
           <div className="lg:w-[40%] flex flex-col min-h-0">
             {/* Filters */}
             <div className="flex gap-1 mb-3 shrink-0">
-              {(["ALL", "OPEN", "UNDER_REVIEW"] as const).map((f) => (
+              {(["ALL", "OPEN", "UNDER_REVIEW", "RESOLVED"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => {

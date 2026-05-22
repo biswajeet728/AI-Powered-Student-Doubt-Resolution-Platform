@@ -25,6 +25,7 @@ interface RecentDoubt {
   aiResponseId: string | null;
   aiAnswer: string | null;
   aiApproved: boolean;
+  aiResponseCreatedAt: Date | null;
   studentName: string;
   responseCount: number;
 }
@@ -54,13 +55,13 @@ export default function DashboardView({
     : doubts;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto max-w-7xl px-4 py-6 h-[calc(100vh-4rem)] overflow-hidden">
       {/* Desktop: 3 columns */}
-      <div className="hidden lg:grid grid-cols-[250px_1fr_250px] gap-4">
-        <div>
+      <div className="hidden lg:grid grid-cols-[250px_1fr_250px] gap-4 h-full">
+        <div className="self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto">
           <LeftSidebar user={user} stats={stats} />
         </div>
-        <main>
+        <main className="overflow-y-auto min-h-0">
           <DoubtFeed
             isStudent={isStudent}
             doubts={filteredDoubts}
@@ -69,7 +70,7 @@ export default function DashboardView({
             onClearSubject={() => setSelectedSubject(null)}
           />
         </main>
-        <div>
+        <div className="self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto">
           <RightSidebar
             selectedSubject={selectedSubject}
             onSelectSubject={setSelectedSubject}
@@ -78,8 +79,8 @@ export default function DashboardView({
       </div>
 
       {/* Tablet: 2 columns (feed + right sidebar) */}
-      <div className="hidden md:grid lg:hidden grid-cols-[1fr_250px] gap-4">
-        <main>
+      <div className="hidden md:grid lg:hidden grid-cols-[1fr_250px] gap-4 h-full">
+        <main className="overflow-y-auto min-h-0">
           <DoubtFeed
             isStudent={isStudent}
             showStats
@@ -89,7 +90,7 @@ export default function DashboardView({
             onClearSubject={() => setSelectedSubject(null)}
           />
         </main>
-        <div className="self-start sticky top-18">
+        <div className="self-start">
           <RightSidebar
             selectedSubject={selectedSubject}
             onSelectSubject={setSelectedSubject}

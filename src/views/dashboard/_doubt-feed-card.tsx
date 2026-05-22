@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useApproveResponse } from "@/lib/hooks/use-responses";
@@ -7,6 +8,7 @@ import { useUpdateDoubtStatus } from "@/lib/hooks/use-doubts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MarkdownRenderer from "@/components/markdown-renderer";
+import { isAutoApproved } from "@/lib/config/ai";
 import {
   HiOutlineSparkles,
   HiOutlineCheckCircle,
@@ -51,6 +53,33 @@ export default function DoubtFeedCard({
 
   const approveMutation = useApproveResponse();
   const updateStatusMutation = useUpdateDoubtStatus();
+
+  // Auto-approve check
+  const isDisapproved = doubt.aiAnswer?.startsWith("__DISAPPROVED__:") ?? false;
+  const [autoApproved, setAutoApproved] = useState(
+    () =>
+      doubt.aiResponseId !== null &&
+      !doubt.aiApproved &&
+      !isDisapproved &&
+      doubt.createdAtDate &&
+      isAutoApproved(doubt.createdAtDate),
+  );
+
+  useEffect(() => {
+    if (autoApproved || doubt.aiApproved || isDisapproved) return;
+    if (!doubt.aiResponseId || !doubt.createdAtDate) return;
+
+    const interval = setInterval(() => {
+      if (isAutoApproved(doubt.createdAtDate!)) {
+        setAutoApproved(true);
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [autoApproved, doubt.aiApproved, isDisapproved, doubt.aiResponseId, doubt.createdAtDate]);
+
+  const effectivelyApproved = doubt.aiApproved || autoApproved;
 
   const handleApprove = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -105,9 +134,9 @@ export default function DoubtFeedCard({
           {doubt.aiAnswer && (
             <div
               className={`rounded-lg border px-3 py-2 mb-3 mt-2 ${
-                doubt.aiApproved
+                effectivelyApproved
                   ? "border-green-500/30 bg-green-500/5"
-                  : doubt.aiAnswer.startsWith("__DISAPPROVED__:")
+                  : isDisapproved
                   ? "border-red-500/20 bg-red-500/5"
                   : "border-purple-500/20 bg-purple-500/5"
               }`}
@@ -117,12 +146,12 @@ export default function DoubtFeedCard({
                 <span className="font-mono text-[10px] font-semibold text-purple-400">
                   AI Answer
                 </span>
-                {doubt.aiApproved ? (
+                {effectivelyApproved ? (
                   <span className="flex items-center gap-0.5 rounded-full bg-green-500/15 px-1.5 py-0.5 font-mono text-[10px] text-green-400">
                     <HiOutlineCheckCircle className="h-2.5 w-2.5" />
                     Verified
                   </span>
-                ) : doubt.aiAnswer.startsWith("__DISAPPROVED__:") ? (
+                ) : isDisapproved ? (
                   <span className="flex items-center gap-0.5 rounded-full bg-red-500/15 px-1.5 py-0.5 font-mono text-[10px] text-red-400">
                     Not Approved
                   </span>
@@ -132,7 +161,7 @@ export default function DoubtFeedCard({
                   </span>
                 )}
               </div>
-              {!doubt.aiAnswer.startsWith("__DISAPPROVED__:") && (
+              {!isDisapproved && (
                 <p className="font-mono text-xs text-white/40 line-clamp-1">
                   {doubt.aiAnswer}
                 </p>
@@ -167,7 +196,7 @@ export default function DoubtFeedCard({
           {/* Teacher action row */}
           {isTeacher && doubt.status === "OPEN" && (
             <div className="flex gap-2 pt-3 border-t border-white/5">
-              {doubt.aiResponseId && !doubt.aiApproved && (
+              {doubt.aiResponseId && !effectivelyApproved && !isDisapproved && (
                 <Button
                   onClick={handleApprove}
                   disabled={approveMutation.isPending}

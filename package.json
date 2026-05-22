@@ -6,7 +6,10 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
+    "dev:1": "rm -rf .next && next dev",
     "build": "next build",
+    "build:1": "rm -rf .next && next build",
+    "inngest": "npx inngest-cli@latest dev",
     "start": "next start"
   },
   "dependencies": {

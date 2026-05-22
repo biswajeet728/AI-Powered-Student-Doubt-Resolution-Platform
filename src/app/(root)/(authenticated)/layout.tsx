@@ -12,6 +12,8 @@ export const metadata: Metadata = {
     "Your personalized dashboard to manage your doubts and interactions.",
 };
 
+// openclaude --resume 31d3c14f-e26a-4d4c-afbd-b6bded6ae0f8
+
 export default async function AuthenticatedLayout({
   children,
 }: Readonly<{

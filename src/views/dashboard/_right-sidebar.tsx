@@ -20,7 +20,7 @@ export default function RightSidebar({
   return (
     <div className="flex flex-col gap-4">
       {/* Filter by Tags */}
-      <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
+      {/* <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
         <CardContent className="p-4">
           <div className="mb-3 flex items-center gap-2">
             <HiOutlineTag className="h-4 w-4 text-amber-400" />
@@ -42,7 +42,7 @@ export default function RightSidebar({
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Filter by Subjects */}
       <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">

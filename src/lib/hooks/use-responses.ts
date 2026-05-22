@@ -17,7 +17,7 @@ export const responseKeys = {
 };
 
 // ── Queries ─────────────────────────────────────────────────────────
-export function useDoubtsForReview(status?: "OPEN" | "UNDER_REVIEW") {
+export function useDoubtsForReview(status?: "OPEN" | "UNDER_REVIEW" | "RESOLVED") {
   return useQuery({
     queryKey: responseKeys.review(status),
     queryFn: () => getDoubtsForReview(status),

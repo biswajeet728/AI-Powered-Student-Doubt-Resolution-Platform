@@ -29,6 +29,7 @@ interface RecentDoubt {
   aiResponseId: string | null;
   aiAnswer: string | null;
   aiApproved: boolean;
+  aiResponseCreatedAt: Date | null;
   studentName: string;
   responseCount: number;
 }
@@ -304,6 +305,9 @@ export default function DoubtFeed({
                 difficulty: doubt.difficulty,
                 status: doubt.status,
                 createdAt: formatTimeAgo(doubt.createdAt),
+                createdAtDate: doubt.aiResponseCreatedAt
+                  ? new Date(doubt.aiResponseCreatedAt)
+                  : new Date(doubt.createdAt),
                 aiResponseId: doubt.aiResponseId,
                 aiAnswer: doubt.aiAnswer,
                 aiApproved: doubt.aiApproved,
