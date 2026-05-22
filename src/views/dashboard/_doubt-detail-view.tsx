@@ -202,7 +202,7 @@ export default function DoubtDetailView({
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col h-[calc(100vh-4rem)] px-4 py-4">
+      <div className="flex flex-col md:h-[calc(100vh-4rem)] px-4 py-4">
         {/* Top bar */}
         <div className="mb-3 flex items-center justify-between shrink-0">
           <button
@@ -234,7 +234,7 @@ export default function DoubtDetailView({
         <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
           {/* ── Left Panel: Doubt ──────────────────────────────── */}
           <div className="lg:w-[55%] flex flex-col min-h-0">
-            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 overflow-hidden">
+            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 lg:overflow-hidden">
               {/* Card header — fixed */}
               <div className="p-5 pb-0 shrink-0">
                 <div className="flex items-center justify-between mb-3">
@@ -290,8 +290,8 @@ export default function DoubtDetailView({
                 </div>
               </div>
 
-              {/* Body — scrollable */}
-              <div className="flex-1 overflow-y-auto px-5 pb-4">
+              {/* Body — scrollable on desktop, flows on mobile */}
+              <div className="flex-1 lg:overflow-y-auto px-5 pb-4">
                 <MarkdownRenderer content={doubt.body} className="mb-4" />
               </div>
 
@@ -308,7 +308,7 @@ export default function DoubtDetailView({
 
           {/* ── Right Panel: Responses ─────────────────────────── */}
           <div className="lg:w-[55%] flex flex-col min-h-0">
-            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 overflow-hidden">
+            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 lg:overflow-hidden">
               {/* Response header — fixed */}
               <div className="p-4 pb-0 shrink-0 flex items-center justify-between">
                 <h2 className="font-mono text-sm font-semibold text-white flex items-center gap-2">
@@ -320,8 +320,8 @@ export default function DoubtDetailView({
                 </h2>
               </div>
 
-              {/* Responses list — scrollable */}
-              <div className="flex-1 overflow-y-auto p-4">
+              {/* Responses list — scrollable on desktop, flows on mobile */}
+              <div className="flex-1 lg:overflow-y-auto p-4">
                 {doubt.responses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full gap-3">
                     {isAiGenerating ? (

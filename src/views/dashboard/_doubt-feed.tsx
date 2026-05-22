@@ -64,7 +64,6 @@ type FilterKey = (typeof FILTERS)[number]["key"];
 export default function DoubtFeed({
   isStudent,
   showStats,
-  showFilters,
   doubts,
   stats,
   selectedSubject,
@@ -72,10 +71,57 @@ export default function DoubtFeed({
 }: DoubtFeedProps) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("ALL");
 
+  // Set to true to test scroll with 10 dummy cards, false for real data
+  const TEST_MODE = false;
+
+  const allDoubts: RecentDoubt[] = TEST_MODE
+    ? Array.from({ length: 10 }, (_, i) => ({
+        id: `test-${i + 1}`,
+        title: `Test Doubt ${i + 1}: ${
+          [
+            "Why does water expand when it freezes?",
+            "Explain dynamic programming with memoization",
+            "What is Rayleigh scattering?",
+            "Difference between mitosis and meiosis",
+            "How does recursion work in JavaScript?",
+            "What is the time complexity of quicksort?",
+            "Explain Newton's third law",
+            "How do DNS lookups work?",
+            "What is the difference between TCP and UDP?",
+            "Explain the concept of closures in programming",
+          ][i]
+        }`,
+        body: `This is a test doubt body for card ${i + 1}. It contains some sample text to test the scroll behavior on both mobile and desktop views. This line should be long enough to show line clamping.`,
+        subject: ["Physics", "Computer Science", "Biology", "Mathematics"][
+          i % 4
+        ],
+        difficulty: (["EASY", "MEDIUM", "HARD"] as const)[i % 3],
+        status: (["OPEN", "OPEN", "UNDER_REVIEW", "RESOLVED", "OPEN"] as const)[
+          i % 5
+        ],
+        createdAt: new Date(Date.now() - i * 3600000),
+        aiResponseId: i % 3 !== 2 ? `ai-${i + 1}` : null,
+        aiAnswer:
+          i % 3 !== 2
+            ? `This is a sample AI-generated answer for doubt ${i + 1}. It explains the concept in detail with examples and code snippets. The answer is formatted using **markdown** for better readability.`
+            : null,
+        aiApproved: i % 3 === 0,
+        aiResponseCreatedAt:
+          i % 3 !== 2 ? new Date(Date.now() - (i * 3600000 - 10000)) : null,
+        studentName: [
+          "Rohan Mehta",
+          "Ananya Shah",
+          "Preet Kapoor",
+          "Arjun Nair",
+        ][i % 4],
+        responseCount: i % 3 !== 2 ? 1 : 0,
+      }))
+    : doubts;
+
   const filteredDoubts =
     activeFilter === "ALL"
-      ? doubts
-      : doubts.filter((d) => d.status === activeFilter);
+      ? allDoubts
+      : allDoubts.filter((d) => d.status === activeFilter);
 
   return (
     <div className="flex flex-col gap-4">
@@ -179,7 +225,8 @@ export default function DoubtFeed({
               <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
               <div>
                 <p className="font-mono text-sm font-semibold text-white">
-                  {stats?.pendingReview ?? stats?.open ?? 0} doubts need your review
+                  {stats?.pendingReview ?? stats?.open ?? 0} doubts need your
+                  review
                 </p>
                 <p className="font-mono text-xs text-white/40">
                   AI has answered — approve or override
@@ -197,36 +244,6 @@ export default function DoubtFeed({
             </Link>
           </CardContent>
         </Card>
-      )}
-
-      {/* Filters — mobile only */}
-      {showFilters && (
-        <>
-          {/* Tags */}
-          <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
-            <CardContent className="p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <HiOutlineTag className="h-4 w-4 text-amber-400" />
-                <span className="font-mono text-xs font-semibold text-white">
-                  Tags
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {DUMMY_TAGS.slice(0, 5).map((tag) => (
-                  <button
-                    key={tag.label}
-                    className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-white/50 hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-300 cursor-pointer"
-                  >
-                    {tag.label}
-                    <span className="rounded-full bg-white/10 px-1 text-[10px] text-white/30">
-                      {tag.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </>
       )}
 
       {/* Feed header */}

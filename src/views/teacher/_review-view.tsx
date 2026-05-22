@@ -112,7 +112,7 @@ export default function ReviewView({
 
   return (
     <div className="mx-auto max-w-7xl py-6">
-      <div className="flex flex-col h-[calc(100vh-4rem)] px-4 py-4">
+      <div className="flex flex-col md:h-[calc(100vh-4rem)] px-4 py-4">
         {/* Stats bar */}
         <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
           <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
@@ -178,7 +178,7 @@ export default function ReviewView({
             </div>
 
             {/* Doubt list — scrollable */}
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 lg:overflow-y-auto space-y-2">
               {doubts.length === 0 ? (
                 <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -250,7 +250,7 @@ export default function ReviewView({
 
           {/* ── Right Panel: Selected Doubt Detail ───────────── */}
           <div className="lg:w-[60%] flex flex-col min-h-0">
-            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 overflow-hidden">
+            <Card className="border-white/10 bg-[#2a2826]/80 backdrop-blur-sm flex-1 flex flex-col min-h-0 lg:overflow-hidden">
               {selectedDoubt ? (
                 <>
                   {/* Header — fixed */}
@@ -291,8 +291,8 @@ export default function ReviewView({
                     </div>
                   </div>
 
-                  {/* Doubt body — scrollable */}
-                  <div className="flex-1 overflow-y-auto p-4">
+                  {/* Doubt body — scrollable on desktop, flows on mobile */}
+                  <div className="flex-1 lg:overflow-y-auto p-4">
                     <MarkdownRenderer content={selectedDoubt.body} />
 
                     {/* Responses */}

@@ -55,7 +55,7 @@ export default function DashboardView({
     : doubts;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="mx-auto max-w-7xl px-4 py-6 md:h-[calc(100vh-4rem)] md:overflow-hidden">
       {/* Desktop: 3 columns */}
       <div className="hidden lg:grid grid-cols-[250px_1fr_250px] gap-4 h-full">
         <div className="self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto">
@@ -99,16 +99,14 @@ export default function DashboardView({
       </div>
 
       {/* Mobile: single column */}
-      <div className="md:hidden">
-        <main>
-          <DoubtFeed
-            isStudent={isStudent}
-            showStats
-            showFilters
-            doubts={filteredDoubts}
-            stats={stats}
-          />
-        </main>
+      <div className="md:hidden overflow-y-auto min-h-0">
+        <DoubtFeed
+          isStudent={isStudent}
+          showStats
+          showFilters
+          doubts={filteredDoubts}
+          stats={stats}
+        />
       </div>
     </div>
   );

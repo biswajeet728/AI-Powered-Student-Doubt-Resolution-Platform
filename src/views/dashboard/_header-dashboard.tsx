@@ -46,15 +46,7 @@ export default function HeaderDashboard() {
           )}
         </nav>
 
-        {/* Desktop User Menu */}
-        <div className="hidden md:block">
-          <DashboardUserMenu user={{ name: user.name, role: user.role }} />
-        </div>
-
-        {/* Mobile Menu */}
-        <div className="md:hidden">
-          <DashboardMobileMenu user={{ name: user.name, role: user.role }} />
-        </div>
+        <DashboardUserMenu user={{ name: user.name, role: user.role }} />
       </div>
     </header>
   );

@@ -80,7 +80,13 @@ export default function DoubtFeedCard({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [autoApproved, doubt.aiApproved, isDisapproved, doubt.aiResponseId, doubt.createdAtDate]);
+  }, [
+    autoApproved,
+    doubt.aiApproved,
+    isDisapproved,
+    doubt.aiResponseId,
+    doubt.createdAtDate,
+  ]);
 
   const effectivelyApproved = doubt.aiApproved || autoApproved;
 
@@ -140,8 +146,8 @@ export default function DoubtFeedCard({
                 effectivelyApproved
                   ? "border-green-500/30 bg-green-500/5"
                   : isDisapproved
-                  ? "border-red-500/20 bg-red-500/5"
-                  : "border-purple-500/20 bg-purple-500/5"
+                    ? "border-red-500/20 bg-red-500/5"
+                    : "border-purple-500/20 bg-purple-500/5"
               }`}
             >
               <div className="flex items-center gap-1.5 mb-1">
