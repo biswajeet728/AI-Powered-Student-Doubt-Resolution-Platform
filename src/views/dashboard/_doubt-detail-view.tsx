@@ -12,6 +12,7 @@ import {
   useApproveResponse,
   useDisapproveResponse,
 } from "@/lib/hooks/use-responses";
+import { autoApproveResponse } from "@/lib/actions/response";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import MarkdownRenderer from "@/components/markdown-renderer";
@@ -140,6 +141,12 @@ export default function DoubtDetailView({
       });
       setAutoApprovedIds((prev) => {
         if (prev.size === newIds.size) return prev;
+        // Update DB for newly auto-approved responses
+        newIds.forEach((id) => {
+          if (!prev.has(id)) {
+            autoApproveResponse(id);
+          }
+        });
         return newIds;
       });
     };
@@ -412,6 +419,9 @@ export default function DoubtDetailView({
                                   disapproved={isDisapproved}
                                   createdAt={
                                     new Date(response.createdAt)
+                                  }
+                                  onAutoApprove={() =>
+                                    autoApproveResponse(response.id)
                                   }
                                 />
                               )}

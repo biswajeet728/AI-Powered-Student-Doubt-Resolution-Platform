@@ -161,6 +161,39 @@ export async function updateResponse(responseId: string, content: string) {
   }
 }
 
+// ── Auto-Approve AI Response ─────────────────────────────────────────
+export async function autoApproveResponse(responseId: string) {
+  try {
+    const response = await prisma.response.findUnique({
+      where: { id: responseId },
+      select: { id: true, doubtId: true, approved: true },
+    });
+
+    if (!response || response.approved) {
+      return {
+        success: false,
+        error: "Response not found or already approved",
+      };
+    }
+
+    await prisma.response.update({
+      where: { id: responseId },
+      data: { approved: true },
+    });
+
+    await prisma.doubt.update({
+      where: { id: response.doubtId },
+      data: { status: "RESOLVED" },
+    });
+
+    return { success: true };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to auto-approve";
+    return { success: false, error: message };
+  }
+}
+
 // ── Get Doubts for Review Queue ──────────────────────────────────────
 export async function getDoubtsForReview(
   status?: "OPEN" | "UNDER_REVIEW" | "RESOLVED",
@@ -260,6 +293,12 @@ export async function getTeacherStats() {
     };
   } catch (error) {
     console.error("Failed to fetch teacher stats:", error);
-    return { pending: 0, reviewed: 0, overridden: 0, totalAI: 0, approvedAI: 0 };
+    return {
+      pending: 0,
+      reviewed: 0,
+      overridden: 0,
+      totalAI: 0,
+      approvedAI: 0,
+    };
   }
 }

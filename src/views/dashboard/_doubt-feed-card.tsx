@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import { isAutoApproved } from "@/lib/config/ai";
+import { autoApproveResponse } from "@/lib/actions/response";
 import {
   HiOutlineSparkles,
   HiOutlineCheckCircle,
@@ -72,6 +73,8 @@ export default function DoubtFeedCard({
     const interval = setInterval(() => {
       if (isAutoApproved(doubt.createdAtDate!)) {
         setAutoApproved(true);
+        // Update DB so status changes to RESOLVED
+        autoApproveResponse(doubt.aiResponseId!);
         clearInterval(interval);
       }
     }, 1000);

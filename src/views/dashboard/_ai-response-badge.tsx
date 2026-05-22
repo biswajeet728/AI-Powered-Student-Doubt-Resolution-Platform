@@ -13,12 +13,14 @@ interface AIResponseBadgeProps {
   approved: boolean;
   disapproved: boolean;
   createdAt: Date;
+  onAutoApprove?: () => void;
 }
 
 export default function AIResponseBadge({
   approved,
   disapproved,
   createdAt,
+  onAutoApprove,
 }: AIResponseBadgeProps) {
   const [autoApproved, setAutoApproved] = useState(() =>
     isAutoApproved(createdAt),
@@ -35,6 +37,7 @@ export default function AIResponseBadge({
       if (isAutoApproved(createdAt)) {
         setAutoApproved(true);
         setTimeRemaining("auto-approved");
+        onAutoApprove?.();
         clearInterval(interval);
       } else {
         setTimeRemaining(getAutoApproveTimeRemaining(createdAt));
@@ -42,7 +45,7 @@ export default function AIResponseBadge({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [approved, disapproved, autoApproved, createdAt]);
+  }, [approved, disapproved, autoApproved, createdAt, onAutoApprove]);
 
   // Disapproved
   if (disapproved) {
