@@ -1,17 +1,12 @@
 import { getServerSession } from "@/lib/get-sessions";
-import { redirect } from "next/navigation";
 import { getDashboardStats, getRecentDoubts } from "@/lib/actions/doubt";
 import DashboardView from "@/views/dashboard/_dashboard-view";
 
 export default async function DashboardPage() {
+  // Layout already ensures auth — session is cached via React cache()
   const session = await getServerSession();
-  const user = session?.user;
+  const user = session!.user!;
 
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  // SSR fetch for initial data
   const [stats, recentDoubts] = await Promise.all([
     getDashboardStats(),
     getRecentDoubts(10),

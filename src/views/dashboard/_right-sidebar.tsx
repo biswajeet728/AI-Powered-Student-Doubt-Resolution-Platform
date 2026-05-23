@@ -1,10 +1,9 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { HiOutlineTag, HiOutlineBookOpen } from "react-icons/hi2";
+import { HiOutlineBookOpen } from "react-icons/hi2";
 import { useSubjects } from "@/lib/hooks/use-subjects";
 import SubjectFilter from "./_subject-filter";
-import { DUMMY_TAGS } from "./_dashboard-data";
 
 interface RightSidebarProps {
   selectedSubject: string | null;

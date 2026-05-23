@@ -11,12 +11,10 @@ import {
   HiOutlineChatBubbleLeftRight,
   HiOutlinePencilSquare,
   HiOutlineChevronRight,
-  HiOutlineTag,
   HiOutlineBookOpen,
   HiOutlineXMark,
 } from "react-icons/hi2";
 import DoubtFeedCard from "./_doubt-feed-card";
-import { DUMMY_TAGS } from "./_dashboard-data";
 
 interface RecentDoubt {
   id: string;
@@ -71,57 +69,10 @@ export default function DoubtFeed({
 }: DoubtFeedProps) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("ALL");
 
-  // Set to true to test scroll with 10 dummy cards, false for real data
-  const TEST_MODE = false;
-
-  const allDoubts: RecentDoubt[] = TEST_MODE
-    ? Array.from({ length: 10 }, (_, i) => ({
-        id: `test-${i + 1}`,
-        title: `Test Doubt ${i + 1}: ${
-          [
-            "Why does water expand when it freezes?",
-            "Explain dynamic programming with memoization",
-            "What is Rayleigh scattering?",
-            "Difference between mitosis and meiosis",
-            "How does recursion work in JavaScript?",
-            "What is the time complexity of quicksort?",
-            "Explain Newton's third law",
-            "How do DNS lookups work?",
-            "What is the difference between TCP and UDP?",
-            "Explain the concept of closures in programming",
-          ][i]
-        }`,
-        body: `This is a test doubt body for card ${i + 1}. It contains some sample text to test the scroll behavior on both mobile and desktop views. This line should be long enough to show line clamping.`,
-        subject: ["Physics", "Computer Science", "Biology", "Mathematics"][
-          i % 4
-        ],
-        difficulty: (["EASY", "MEDIUM", "HARD"] as const)[i % 3],
-        status: (["OPEN", "OPEN", "UNDER_REVIEW", "RESOLVED", "OPEN"] as const)[
-          i % 5
-        ],
-        createdAt: new Date(Date.now() - i * 3600000),
-        aiResponseId: i % 3 !== 2 ? `ai-${i + 1}` : null,
-        aiAnswer:
-          i % 3 !== 2
-            ? `This is a sample AI-generated answer for doubt ${i + 1}. It explains the concept in detail with examples and code snippets. The answer is formatted using **markdown** for better readability.`
-            : null,
-        aiApproved: i % 3 === 0,
-        aiResponseCreatedAt:
-          i % 3 !== 2 ? new Date(Date.now() - (i * 3600000 - 10000)) : null,
-        studentName: [
-          "Rohan Mehta",
-          "Ananya Shah",
-          "Preet Kapoor",
-          "Arjun Nair",
-        ][i % 4],
-        responseCount: i % 3 !== 2 ? 1 : 0,
-      }))
-    : doubts;
-
   const filteredDoubts =
     activeFilter === "ALL"
-      ? allDoubts
-      : allDoubts.filter((d) => d.status === activeFilter);
+      ? doubts
+      : doubts.filter((d) => d.status === activeFilter);
 
   return (
     <div className="flex flex-col gap-4">

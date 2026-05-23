@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-// Auth routes - redirect to dashboard if already logged in
-const authRoutes = ["/sign-in", "/sign-up"];
-
-// Protected routes - require login (add more as needed)
+const authRoutes = new Set(["/sign-in", "/sign-up"]);
 const protectedRoutes = ["/profile"];
 
-function isRoute(pathname: string, routes: string[]) {
-  return routes.some(
-    (route) => pathname === route || pathname.startsWith(route + "/"),
-  );
+function needsSessionCheck(pathname: string): boolean {
+  if (authRoutes.has(pathname)) return true;
+  return protectedRoutes.some((r) => pathname === r || pathname.startsWith(r + "/"));
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow Inngest
-  if (pathname.startsWith("/api/inngest")) {
+  // Skip all non-essential routes — no DB call
+  if (pathname.startsWith("/api/") || !needsSessionCheck(pathname)) {
     return NextResponse.next();
   }
 
@@ -26,7 +22,7 @@ export async function proxy(request: NextRequest) {
   });
 
   // Auth routes: redirect to dashboard if already logged in
-  if (isRoute(pathname, authRoutes)) {
+  if (authRoutes.has(pathname)) {
     if (session) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
@@ -34,14 +30,10 @@ export async function proxy(request: NextRequest) {
   }
 
   // Protected routes: redirect to sign-in if not logged in
-  if (isRoute(pathname, protectedRoutes)) {
-    if (!session) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-    return NextResponse.next();
+  if (!session) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  // Public routes: accessible to everyone
   return NextResponse.next();
 }
 

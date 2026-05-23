@@ -6,10 +6,7 @@ import ReviewView from "@/views/teacher/_review-view";
 
 export default async function TeacherReviewPage() {
   const session = await getServerSession();
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
-  if (session.user.role !== "TEACHER") {
+  if (session?.user?.role !== "TEACHER") {
     redirect("/dashboard");
   }
 

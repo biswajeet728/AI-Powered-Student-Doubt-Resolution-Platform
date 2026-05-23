@@ -62,6 +62,7 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("session")
 }
 
@@ -100,6 +101,9 @@ model Doubt {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
+  @@index([status])
+  @@index([userId, createdAt])
+  @@index([subjectId])
   @@map("doubt")
 }
 
@@ -115,6 +119,8 @@ model Response {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
+  @@index([doubtId, source])
+  @@index([approved])
   @@map("response")
 }
 

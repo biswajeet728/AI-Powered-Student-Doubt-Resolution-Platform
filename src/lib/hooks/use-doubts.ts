@@ -25,6 +25,7 @@ export function useMyDoubts(status?: "OPEN" | "UNDER_REVIEW" | "RESOLVED") {
   return useQuery({
     queryKey: doubtKeys.my(status),
     queryFn: () => getMyDoubts(status),
+    staleTime: 30_000,
   });
 }
 
@@ -53,7 +54,7 @@ export function useRecentDoubts(limit = 10) {
   return useQuery({
     queryKey: doubtKeys.recent(limit),
     queryFn: () => getRecentDoubts(limit),
-    refetchInterval: 10000,
+    staleTime: 30_000,
   });
 }
 
@@ -61,6 +62,7 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: doubtKeys.stats(),
     queryFn: () => getDashboardStats(),
+    staleTime: 30_000,
   });
 }
 

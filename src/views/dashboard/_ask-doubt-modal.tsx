@@ -5,13 +5,10 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HiOutlineSparkles, HiOutlineXMark } from "react-icons/hi2";
 import DoubtForm from "./_doubt-form";
-import type { SubjectWithCount } from "@/lib/actions/subject";
+import { useSubjects } from "@/lib/hooks/use-subjects";
 
-interface AskDoubtModalProps {
-  subjects: SubjectWithCount[];
-}
-
-export default function AskDoubtModal({ subjects }: AskDoubtModalProps) {
+export default function AskDoubtModal() {
+  const { data: subjects = [] } = useSubjects();
   const [open, setOpen] = useState(false);
   const router = useRouter();
 

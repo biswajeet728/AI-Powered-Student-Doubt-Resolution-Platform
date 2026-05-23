@@ -1,7 +1,6 @@
 import { getServerSession } from "@/lib/get-sessions";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getSubjects } from "@/lib/actions/subject";
 import HeaderDashboard from "@/views/dashboard/_header-dashboard";
 import FooterDashboard from "@/views/dashboard/_footer-dashboard";
 import AskDoubtModal from "@/views/dashboard/_ask-doubt-modal";
@@ -25,8 +24,6 @@ export default async function AuthenticatedLayout({
     redirect("/sign-in");
   }
 
-  const subjects = await getSubjects();
-
   return (
     <AuthenticatedWrapper
       initialUser={{
@@ -39,7 +36,7 @@ export default async function AuthenticatedLayout({
       header={<HeaderDashboard />}
       footer={<FooterDashboard />}
       modal={
-        user.role === "STUDENT" ? <AskDoubtModal subjects={subjects} /> : null
+        user.role === "STUDENT" ? <AskDoubtModal /> : null
       }
     >
       {children}

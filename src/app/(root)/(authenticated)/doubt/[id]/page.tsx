@@ -1,4 +1,4 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getServerSession } from "@/lib/get-sessions";
 import { getDoubtById } from "@/lib/actions/doubt";
 import { getSubjects } from "@/lib/actions/subject";
@@ -10,15 +10,13 @@ interface PageProps {
 
 export default async function DoubtDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const session = await getServerSession();
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
 
   const [result, subjects] = await Promise.all([
     getDoubtById(id),
     getSubjects(),
   ]);
+
+  const session = await getServerSession();
 
   if (!result.success) {
     notFound();
@@ -29,7 +27,7 @@ export default async function DoubtDetailPage({ params }: PageProps) {
       doubtId={id}
       initialDoubt={result.doubt!}
       currentUserId={result.currentUserId}
-      currentUserRole={session.user.role}
+      currentUserRole={session!.user!.role}
       subjects={subjects}
     />
   );
