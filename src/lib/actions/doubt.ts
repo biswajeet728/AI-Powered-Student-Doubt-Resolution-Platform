@@ -250,7 +250,7 @@ export async function getDashboardStats() {
       prisma.doubt.count(),
       prisma.doubt.count({ where: { status: "OPEN" } }),
       prisma.doubt.count({ where: { status: "RESOLVED" } }),
-      prisma.response.count({ where: { source: "AI" } }),
+      prisma.response.count({ where: { source: "AI", approved: true } }),
       // For teachers: count OPEN + UNDER_REVIEW as pending
       isStudent
         ? Promise.resolve(0)
