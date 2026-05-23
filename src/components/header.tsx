@@ -57,30 +57,27 @@ export default function HomeHeader() {
                 align="end"
                 className="w-48 bg-[#2a2826] border-white"
               >
-                <DropdownMenuItem
-                  onClick={() => router.push("/profile")}
-                  className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-                >
-                  <HiOutlineUser className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                {isTeacher && (
-                  <DropdownMenuItem
-                    onClick={() => router.push("/teacher/review")}
-                    className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-                  >
-                    <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
-                    Review Doubts
+                <Link href="/profile">
+                  <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+                    <HiOutlineUser className="mr-2 h-4 w-4" />
+                    Profile
                   </DropdownMenuItem>
+                </Link>
+                {isTeacher && (
+                  <Link href="/teacher/review">
+                    <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+                      <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+                      Review Doubts
+                    </DropdownMenuItem>
+                  </Link>
                 )}
                 {!isTeacher && (
-                  <DropdownMenuItem
-                    onClick={() => router.push("/my-doubts")}
-                    className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-                  >
-                    <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
-                    My Doubts
-                  </DropdownMenuItem>
+                  <Link href="/my-doubts">
+                    <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+                      <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+                      My Doubts
+                    </DropdownMenuItem>
+                  </Link>
                 )}
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuItem

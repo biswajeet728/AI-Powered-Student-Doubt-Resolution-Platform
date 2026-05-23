@@ -14,6 +14,7 @@ import {
   HiOutlineAcademicCap,
   HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
+import Link from "next/link";
 
 interface DashboardUserMenuProps {
   user: {
@@ -49,30 +50,27 @@ export default function DashboardUserMenu({ user }: DashboardUserMenuProps) {
           <p className="font-mono text-xs text-white/50">{user.role}</p>
         </div>
         <DropdownMenuSeparator className="bg-white/10" />
-        <DropdownMenuItem
-          onClick={() => router.push("/profile")}
-          className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-        >
-          <HiOutlineUser className="mr-2 h-4 w-4" />
-          Profile
-        </DropdownMenuItem>
-        {user.role === "STUDENT" && (
-          <DropdownMenuItem
-            onClick={() => router.push("/my-doubts")}
-            className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-          >
-            <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
-            My Doubts
+        <Link href="/profile">
+          <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+            <HiOutlineUser className="mr-2 h-4 w-4" />
+            Profile
           </DropdownMenuItem>
+        </Link>
+        {user.role === "STUDENT" && (
+          <Link href="/my-doubts">
+            <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+              <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+              My Doubts
+            </DropdownMenuItem>
+          </Link>
         )}
         {user.role === "TEACHER" && (
-          <DropdownMenuItem
-            onClick={() => router.push("/teacher/review")}
-            className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer"
-          >
-            <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
-            Review
-          </DropdownMenuItem>
+          <Link href="/teacher/review">
+            <DropdownMenuItem className="font-mono text-white focus:bg-white/10 focus:text-white cursor-pointer">
+              <HiOutlineAcademicCap className="mr-2 h-4 w-4" />
+              Review
+            </DropdownMenuItem>
+          </Link>
         )}
         <DropdownMenuSeparator className="bg-white/10" />
         <DropdownMenuItem
