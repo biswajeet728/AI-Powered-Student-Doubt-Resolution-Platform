@@ -246,17 +246,11 @@ export async function getDashboardStats() {
   const isStudent = session.user.role === "STUDENT";
 
   try {
-    const where = isStudent ? { userId: session.user.id } : {};
-
     const [total, open, resolved, responses, pendingReview] = await Promise.all([
-      prisma.doubt.count({ where }),
-      prisma.doubt.count({ where: { ...where, status: "OPEN" } }),
-      prisma.doubt.count({ where: { ...where, status: "RESOLVED" } }),
-      prisma.response.count({
-        where: isStudent
-          ? { doubt: { userId: session.user.id }, source: "AI" }
-          : { source: "AI" },
-      }),
+      prisma.doubt.count(),
+      prisma.doubt.count({ where: { status: "OPEN" } }),
+      prisma.doubt.count({ where: { status: "RESOLVED" } }),
+      prisma.response.count({ where: { source: "AI" } }),
       // For teachers: count OPEN + UNDER_REVIEW as pending
       isStudent
         ? Promise.resolve(0)
