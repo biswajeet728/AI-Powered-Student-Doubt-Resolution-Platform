@@ -23,6 +23,7 @@ A full-stack EdTech platform where students post academic doubts, receive instan
 - **Profile** — View stats, edit name, change password
 - **Dashboard** — Stats overview, recent doubts feed, subject filtering, fixed sidebars with center-scroll
 - **Keyboard Shortcut** — Alt+Q opens the post doubt modal from anywhere on the dashboard
+- **Chat with AI** — After a doubt is answered, students can chat with AI to ask follow-up questions, request clarifications, or explore related concepts. Chat history is saved per user and streams in real-time.
 
 ### Teacher
 
@@ -35,6 +36,7 @@ A full-stack EdTech platform where students post academic doubts, receive instan
 - **Dashboard** — Pending review banner with count, teacher-specific stats
 - **Resolved Doubts** — Teachers can view all statuses including resolved doubts in the review queue
 - **Feed Card Actions** — Quick Approve/Override buttons directly on the dashboard feed
+- **Chat with AI** — Teachers can also chat with AI about any doubt's answer for deeper explanations or to verify AI reasoning before approving.
 
 ### Shared
 
@@ -148,6 +150,7 @@ Verification  — Email verification tokens (better-auth)
 Subject       — id, name, description
 Doubt         — id, title, body, status (OPEN/UNDER_REVIEW/RESOLVED), difficulty, userId, subjectId
 Response      — id, content, source (AI/TEACHER), approved, doubtId, userId
+ChatMessage   — id, role (USER/ASSISTANT), content, userId, doubtId, responseId?
 ```
 
 ---
@@ -170,6 +173,7 @@ src/
         teacher/review/    — Teacher review queue (two-panel)
     api/
       auth/[...all]/       — better-auth handler
+      chat/                — Chat with AI (GET history + POST streaming)
       inngest/             — Inngest serverless handler
   components/
     ui/                    — shadcn components
@@ -178,6 +182,7 @@ src/
     footer.tsx             — Landing page footer
     markdown-editor.tsx    — Markdown editor wrapper
     markdown-renderer.tsx  — Markdown renderer
+    _chat-with-ai-sheet.tsx — Slide-out chat sheet with streaming
   views/
     dashboard/
       _dashboard-view.tsx     — 3-column layout (fixed sidebars, scrollable center)
@@ -219,12 +224,14 @@ src/
     actions/
       doubt.ts                — Doubt CRUD + stats
       response.ts             — Teacher response CRUD + review queue
+      chat.ts                 — Chat API helpers (send message + load history)
       subject.ts              — Subject fetch
       profile.ts              — Profile update (name, password, image)
     hooks/
       use-doubts.ts           — Doubt queries + mutations
       use-responses.ts        — Response queries + mutations
       use-subjects.ts         — Subject queries
+      use-chat.ts             — Chat hook with real-time streaming
   inngest/
     client.ts                 — Inngest client
     functions/
@@ -280,6 +287,35 @@ Time 24h:   Auto-approve triggers
             Border → green (same as manually approved)
             Warning → disappears
             Feed card → shows "Verified" (next refresh cycle)
+```
+
+### Chat with AI
+
+```
+1. Student/Teacher clicks "Chat with AI" on a doubt detail page
+   → Slide-out sheet opens from the right
+   → Chat history loaded from DB (user-specific)
+
+2. User types a question and sends
+   → Message appears instantly in the chat
+   → API builds prompt with: doubt context + ALL responses + chat history
+   → Calls OpenRouter with streaming enabled
+
+3. AI response streams in word by word
+   → ReadableStream pipes tokens to the client in real-time
+   → User message saved to DB immediately
+   → AI response saved after stream completes
+
+4. Chat persists across sessions
+   → Each user has their own private chat per doubt
+   → History loads from DB on every sheet open
+   → AI has full context of all prior messages
+
+Context sent to AI:
+- Doubt title, body, subject, difficulty
+- ALL responses (AI + Teacher) with source and approval status
+- Full chat history for the current user
+- Guardrails: stay on-topic, don't contradict teacher answers, admit uncertainty
 ```
 
 ---
