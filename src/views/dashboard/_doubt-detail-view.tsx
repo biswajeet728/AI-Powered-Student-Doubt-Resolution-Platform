@@ -33,6 +33,8 @@ import {
   HiOutlineClock,
 } from "react-icons/hi2";
 import type { SubjectWithCount } from "@/lib/actions/subject";
+import { ChatWithAiSheet } from "@/components/_chat-with-ai-sheet";
+import { useUser } from "@/lib/providers/user-context";
 
 interface DoubtDetail {
   id: string;
@@ -101,6 +103,7 @@ export default function DoubtDetailView({
   subjects,
 }: DoubtDetailViewProps) {
   const router = useRouter();
+  const { openChatSheet } = useUser();
   const [editOpen, setEditOpen] = useState(false);
   const [editingResponse, setEditingResponse] = useState<{
     id: string;
@@ -227,6 +230,26 @@ export default function DoubtDetailView({
                 {doubt.subject.name}
               </span>
             )}
+
+            <Button
+              className="bg-amber-500 text-black hover:bg-amber-400 cursor-pointer font-mono hidden md:inline-flex"
+              size="sm"
+              type="button"
+              onClick={() => openChatSheet(doubt.id)}
+              disabled={!!isAiGenerating}
+            >
+              Chat with AI
+            </Button>
+
+            <Button
+              className="bg-amber-500 text-black hover:bg-amber-400 cursor-pointer font-mono inline-flex md:hidden p-2"
+              size="sm"
+              type="button"
+              onClick={() => openChatSheet(doubt.id)}
+              disabled={!!isAiGenerating}
+            >
+              <HiOutlineSparkles className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -566,6 +589,8 @@ export default function DoubtDetailView({
             onClose={() => setEditingResponse(null)}
           />
         )}
+
+        <ChatWithAiSheet />
       </div>
     </div>
   );

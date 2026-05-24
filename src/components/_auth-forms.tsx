@@ -88,6 +88,8 @@ export default function AuthForms({ mode }: AuthFormsProps) {
     } finally {
       setLoading(false);
     }
+
+    clearForm();
   };
 
   const clearForm = () => {
