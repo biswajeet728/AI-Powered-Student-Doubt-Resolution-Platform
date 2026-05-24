@@ -13,6 +13,10 @@ interface UserData {
 interface UserContextType {
   user: UserData;
   updateName: (name: string) => void;
+  chatWithAiSheet: boolean;
+  chatDoubtId: string | null;
+  openChatSheet: (doubtId: string) => void;
+  closeChatSheet: () => void;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -25,13 +29,34 @@ export function UserProvider({
   children: React.ReactNode;
 }) {
   const [user, setUser] = useState(initialUser);
+  const [chatWithAiSheet, setChatWithAiSheet] = useState(false);
+  const [chatDoubtId, setChatDoubtId] = useState<string | null>(null);
 
   const updateName = useCallback((name: string) => {
     setUser((prev) => ({ ...prev, name }));
   }, []);
 
+  const openChatSheet = useCallback((doubtId: string) => {
+    setChatDoubtId(doubtId);
+    setChatWithAiSheet(true);
+  }, []);
+
+  const closeChatSheet = useCallback(() => {
+    setChatWithAiSheet(false);
+    setChatDoubtId(null);
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, updateName }}>
+    <UserContext.Provider
+      value={{
+        user,
+        updateName,
+        chatWithAiSheet,
+        chatDoubtId,
+        openChatSheet,
+        closeChatSheet,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

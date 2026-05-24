@@ -25,8 +25,9 @@ function Hero() {
 
         {/* Subtitle */}
         <p className="mx-auto mt-6 max-w-2xl font-mono text-lg text-white/60">
-          Post your academic doubts, get AI-generated explanations, and have
-          teachers review and approve the best answers. Learning made simple.
+          Post your academic doubts, get AI-generated explanations, chat with
+          DoubtFlowGPT and have teachers review and approve the best answers.
+          Learning made simple.
         </p>
 
         {/* CTA Buttons */}

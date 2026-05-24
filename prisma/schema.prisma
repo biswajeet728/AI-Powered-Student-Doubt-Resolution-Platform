@@ -28,6 +28,7 @@ model User {
   updatedAt      DateTime  @updatedAt
 
   @@map("user")
+  chatMessages ChatMessage[]
 }
 
 model Account {
@@ -105,6 +106,8 @@ model Doubt {
   @@index([userId, createdAt])
   @@index([subjectId])
   @@map("doubt")
+
+  chatMessages ChatMessage[]
 }
 
 model Response {
@@ -122,6 +125,30 @@ model Response {
   @@index([doubtId, source])
   @@index([approved])
   @@map("response")
+
+  chatMessages ChatMessage[]
+}
+
+model ChatMessage {
+    id         String    @id @default(uuid())
+    role       ChatRole
+    content    String    @db.Text
+    userId     String
+    doubtId    String
+    responseId String?
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    doubt      Doubt     @relation(fields: [doubtId], references: [id], onDelete: Cascade)
+    response   Response? @relation(fields: [responseId], references: [id], onDelete: Cascade)
+    createdAt  DateTime  @default(now())
+
+    @@index([doubtId])
+    @@index([userId])
+    @@map("chat_message")
+  }
+
+enum ChatRole {
+  USER
+  ASSISTANT
 }
 
 enum Role {
