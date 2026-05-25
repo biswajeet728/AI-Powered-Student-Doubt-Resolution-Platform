@@ -342,9 +342,3 @@ Context sent to AI:
 | `INNGEST_SIGNING_KEY` | From Inngest dashboard → Settings → Keys |
 
 **Important:** Do NOT set `INNGEST_DEV=1` in production. Remove it if present.
-
----
-
-## License
-
-This project is built as a job assignment for House of Edtech.
