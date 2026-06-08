@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { toast } from "sonner";
 import { useUpdateResponse } from "@/lib/hooks/use-responses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ export default function EditResponseModal({
   onClose,
 }: EditResponseModalProps) {
   const [content, setContent] = useState(initialContent);
+  const [isPending, startTransition] = useTransition();
   const mutation = useUpdateResponse();
 
   useEffect(() => {
@@ -37,13 +38,15 @@ export default function EditResponseModal({
       return;
     }
 
-    const result = await mutation.mutateAsync({ responseId, content });
-    if (result.success) {
-      toast.success("Response updated!");
-      onClose();
-    } else {
-      toast.error(result.error || "Failed to update response");
-    }
+    startTransition(async () => {
+      const result = await mutation.mutateAsync({ responseId, content });
+      if (result.success) {
+        toast.success("Response updated!");
+        onClose();
+      } else {
+        toast.error(result.error || "Failed to update response");
+      }
+    });
   };
 
   if (!open) return null;
@@ -99,10 +102,10 @@ export default function EditResponseModal({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={mutation.isPending}
+                  disabled={isPending}
                   className="font-mono flex-1 bg-amber-500 text-black hover:bg-amber-400 cursor-pointer"
                 >
-                  {mutation.isPending ? "Saving..." : "Save Changes"}
+                  {isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </form>

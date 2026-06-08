@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateProfileName, changePassword } from "@/lib/actions/profile";
@@ -39,7 +39,7 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
   // Name editing
   const [name, setName] = useState(user.name);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [nameLoading, setNameLoading] = useState(false);
+  const [isNamePending, startNameTransition] = useTransition();
 
   // Sync name state when user prop changes (after router.refresh)
   useEffect(() => {
@@ -52,27 +52,28 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [isPasswordPending, startPasswordTransition] = useTransition();
 
-  const handleNameSave = async () => {
+  const handleNameSave = () => {
     if (!name.trim()) {
       toast.error("Name cannot be empty");
       return;
     }
-    setNameLoading(true);
-    const result = await updateProfileName(name);
-    if (result.success) {
-      toast.success("Name updated!");
-      setIsEditingName(false);
-      updateName(name);
-      router.refresh();
-    } else {
-      toast.error(result.error || "Failed to update name");
-    }
-    setNameLoading(false);
+
+    startNameTransition(async () => {
+      const result = await updateProfileName(name);
+      if (result.success) {
+        toast.success("Name updated!");
+        setIsEditingName(false);
+        updateName(name);
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to update name");
+      }
+    });
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error("Passwords don't match");
@@ -83,17 +84,17 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
       return;
     }
 
-    setPasswordLoading(true);
-    const result = await changePassword(currentPassword, newPassword);
-    if (result.success) {
-      toast.success("Password changed!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } else {
-      toast.error(result.error || "Failed to change password");
-    }
-    setPasswordLoading(false);
+    startPasswordTransition(async () => {
+      const result = await changePassword(currentPassword, newPassword);
+      if (result.success) {
+        toast.success("Password changed!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error(result.error || "Failed to change password");
+      }
+    });
   };
 
   return (
@@ -108,9 +109,7 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
               <p className="font-mono text-2xl font-bold text-amber-400">
                 {stats.total}
               </p>
-              <p className="font-mono text-xs text-white/40">
-                Total Doubts
-              </p>
+              <p className="font-mono text-xs text-white/40">Total Doubts</p>
             </div>
             <div>
               <p className="font-mono text-2xl font-bold text-blue-400">
@@ -179,14 +178,15 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
                       onChange={(e) => setName(e.target.value)}
                       className="font-mono border-white/10 bg-white/5 text-white placeholder:text-white/25 focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20"
                       autoFocus
+                      disabled={isNamePending}
                     />
                     <Button
                       onClick={handleNameSave}
-                      disabled={nameLoading}
+                      disabled={isNamePending}
                       size="sm"
                       className="font-mono bg-amber-500 text-black hover:bg-amber-400 shrink-0 cursor-pointer"
                     >
-                      {nameLoading ? "Saving..." : "Save"}
+                      {isNamePending ? "Saving..." : "Save"}
                     </Button>
                     <Button
                       onClick={() => {
@@ -252,7 +252,10 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
             <form onSubmit={handlePasswordChange} className="space-y-4">
               {/* Current Password */}
               <div className="space-y-2">
-                <Label htmlFor="current-password" className="font-mono text-sm text-white/70">
+                <Label
+                  htmlFor="current-password"
+                  className="font-mono text-sm text-white/70"
+                >
                   Current Password
                 </Label>
                 <div className="relative">
@@ -264,13 +267,17 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
                     className="font-mono border-white/10 bg-white/5 text-white placeholder:text-white/25 pl-10 focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20"
+                    disabled={isPasswordPending}
                   />
                 </div>
               </div>
 
               {/* New Password */}
               <div className="space-y-2">
-                <Label htmlFor="new-password" className="font-mono text-sm text-white/70">
+                <Label
+                  htmlFor="new-password"
+                  className="font-mono text-sm text-white/70"
+                >
                   New Password
                 </Label>
                 <div className="relative">
@@ -282,13 +289,17 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="At least 8 characters"
                     className="font-mono border-white/10 bg-white/5 text-white placeholder:text-white/25 pl-10 focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20"
+                    disabled={isPasswordPending}
                   />
                 </div>
               </div>
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="font-mono text-sm text-white/70">
+                <Label
+                  htmlFor="confirm-password"
+                  className="font-mono text-sm text-white/70"
+                >
                   Confirm New Password
                 </Label>
                 <div className="relative">
@@ -300,16 +311,22 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm new password"
                     className="font-mono border-white/10 bg-white/5 text-white placeholder:text-white/25 pl-10 focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20"
+                    disabled={isPasswordPending}
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}
+                disabled={
+                  isPasswordPending ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword
+                }
                 className="font-mono bg-amber-500 text-black hover:bg-amber-400 cursor-pointer"
               >
-                {passwordLoading ? "Changing..." : "Change Password"}
+                {isPasswordPending ? "Changing..." : "Change Password"}
               </Button>
             </form>
           </CardContent>

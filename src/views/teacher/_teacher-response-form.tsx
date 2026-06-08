@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useCreateTeacherResponse } from "@/lib/hooks/use-responses";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export default function TeacherResponseForm({
   const [content, setContent] = useState("");
   const [expanded, setExpanded] = useState(false);
   const mutation = useCreateTeacherResponse();
+  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +30,17 @@ export default function TeacherResponseForm({
       return;
     }
 
-    const result = await mutation.mutateAsync({ doubtId, content });
-    if (result.success) {
-      toast.success("Response posted!");
-      setContent("");
-      setExpanded(false);
-      onSuccess?.();
-    } else {
-      toast.error(result.error || "Failed to post response");
-    }
+    startTransition(async () => {
+      const result = await mutation.mutateAsync({ doubtId, content });
+      if (result.success) {
+        toast.success("Response posted!");
+        setContent("");
+        setExpanded(false);
+        onSuccess?.();
+      } else {
+        toast.error(result.error || "Failed to post doubt");
+      }
+    });
   };
 
   if (!expanded) {
@@ -84,11 +87,11 @@ export default function TeacherResponseForm({
       <div className="flex justify-end">
         <Button
           type="submit"
-          disabled={mutation.isPending || !content.trim()}
+          disabled={isPending || !content.trim()}
           size="sm"
           className="font-mono text-xs bg-amber-500 text-black hover:bg-amber-400 cursor-pointer"
         >
-          {mutation.isPending ? (
+          {isPending ? (
             "Posting..."
           ) : (
             <>

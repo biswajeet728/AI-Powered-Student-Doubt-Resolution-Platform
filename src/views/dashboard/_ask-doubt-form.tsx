@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createDoubt } from "@/lib/actions/doubt";
@@ -25,7 +25,7 @@ export default function AskDoubtForm({ subjects }: AskDoubtFormProps) {
   const [body, setBody] = useState("");
   const [subjectId, setSubjectId] = useState("");
   const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">("MEDIUM");
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,21 +34,21 @@ export default function AskDoubtForm({ subjects }: AskDoubtFormProps) {
       return;
     }
 
-    setLoading(true);
-    const result = await createDoubt({
-      title,
-      body,
-      subjectId: subjectId || undefined,
-      difficulty,
-    });
+    startTransition(async () => {
+      const result = await createDoubt({
+        title,
+        body,
+        subjectId: subjectId || undefined,
+        difficulty,
+      });
 
-    if (result.success) {
-      toast.success("Doubt posted! AI will answer shortly.");
-      router.push(`/doubt/${result.doubtId}`);
-    } else {
-      toast.error(result.error || "Failed to post doubt");
-    }
-    setLoading(false);
+      if (result.success) {
+        toast.success("Doubt posted! AI will answer shortly.");
+        router.push(`/doubt/${result.doubtId}`);
+      } else {
+        toast.error(result.error || "Failed to post doubt");
+      }
+    });
   };
 
   return (
@@ -158,10 +158,10 @@ export default function AskDoubtForm({ subjects }: AskDoubtFormProps) {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="font-mono w-full bg-amber-500 text-black hover:bg-amber-400 cursor-pointer py-5"
             >
-              {loading ? (
+              {isPending ? (
                 "Posting..."
               ) : (
                 <>

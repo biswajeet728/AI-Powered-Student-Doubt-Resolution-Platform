@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -31,65 +31,62 @@ export default function AuthForms({ mode }: AuthFormsProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      if (isSignUp) {
-        if (!name || !email || !password) {
-          toast.error("Please fill in all fields");
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp.email(
-          {
-            name,
-            email,
-            password,
-          },
-          {
-            body: {
-              role,
-            },
-          },
-        );
-
-        if (error) {
-          toast.error(error.message || "Something went wrong");
-        } else {
-          toast.success("Account created!");
-          router.push("/dashboard");
-        }
-      } else {
-        if (!email || !password) {
-          toast.error("Please fill in all fields");
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signIn.email({
-          email,
-          password,
-        });
-
-        if (error) {
-          toast.error(error.message || "Invalid credentials");
-        } else {
-          toast.success("Welcome back!");
-          router.push("/dashboard");
-        }
-      }
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setLoading(false);
+    // Validate before kicking off the transition
+    if (isSignUp && (!name || !email || !password)) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (!isSignUp && (!email || !password)) {
+      toast.error("Please fill in all fields");
+      return;
     }
 
-    clearForm();
+    startTransition(async () => {
+      try {
+        if (isSignUp) {
+          const { error } = await signUp.email(
+            {
+              name,
+              email,
+              password,
+            },
+            {
+              body: {
+                role,
+              },
+            },
+          );
+
+          if (error) {
+            toast.error(error.message || "Something went wrong");
+          } else {
+            toast.success("Account created!");
+            router.push("/dashboard");
+          }
+        } else {
+          const { error } = await signIn.email({
+            email,
+            password,
+          });
+
+          if (error) {
+            toast.error(error.message || "Invalid credentials");
+          } else {
+            toast.success("Welcome back!");
+            router.push("/dashboard");
+          }
+        }
+      } catch {
+        toast.error("Something went wrong");
+      } finally {
+        clearForm();
+      }
+    });
   };
 
   const clearForm = () => {
@@ -231,12 +228,12 @@ export default function AuthForms({ mode }: AuthFormsProps) {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="font-mono w-full bg-amber-500 text-black hover:bg-amber-400 cursor-pointer py-5"
               size="lg"
             >
-              {loading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
-              {!loading && <HiOutlineArrowRight className="ml-2 h-4 w-4" />}
+              {isPending ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
+              {!isPending && <HiOutlineArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
 

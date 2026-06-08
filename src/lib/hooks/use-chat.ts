@@ -1,5 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import {
+  useCallback,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { getChatHistory, sendChatMessage } from "../actions/chat";
 
 interface ChatMessage {
@@ -27,23 +33,18 @@ export function useChat(doubtId: string) {
     useGetChatHistory(doubtId);
 
   const [streamingContent, setStreamingContent] = useState("");
-  const [streamingUserMessage, setStreamingUserMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
   const abortRef = useRef<AbortController | null>(null);
 
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic<
+    ChatMessage[],
+    ChatMessage
+  >(history || [], (current, newMessage) => [...current, newMessage]);
+
   const messages: ChatMessage[] = [
-    ...(history || []),
-    ...(streamingUserMessage
-      ? [
-          {
-            id: "streaming-user",
-            role: "USER" as const,
-            content: streamingUserMessage,
-            createdAt: new Date().toISOString(),
-          },
-        ]
-      : []),
+    ...optimisticMessages,
     ...(streamingContent
       ? [
           {
@@ -59,49 +60,57 @@ export function useChat(doubtId: string) {
   const sendMessage = useCallback(
     async (message: string) => {
       if (!message.trim() || isStreaming) return;
+      const trimmed = message.trim();
 
       setError(null);
-      setStreamingUserMessage(message.trim());
       setIsStreaming(true);
       setStreamingContent("");
 
-      try {
-        const response = await sendChatMessage({
-          doubtId,
-          message: message.trim(),
+      startTransition(async () => {
+        // Optimistic user bubble — visible for the whole transition.
+        addOptimisticMessage({
+          id: "optimistic-user",
+          role: "USER",
+          content: trimmed,
+          createdAt: new Date().toISOString(),
         });
 
-        const reader = response.body!.getReader();
-        const decoder = new TextDecoder();
-        let fullContent = "";
+        try {
+          const response = await sendChatMessage({
+            doubtId,
+            message: trimmed,
+          });
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          let fullContent = "";
 
-          const chunk = decoder.decode(value, { stream: true });
-          fullContent += chunk;
-          setStreamingContent(fullContent);
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            fullContent += chunk;
+            setStreamingContent(fullContent);
+          }
+
+          await queryClient.invalidateQueries({
+            queryKey: ["chatHistory", doubtId],
+          });
+
+          setStreamingContent("");
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : "Failed to send message";
+          setError(msg);
+          console.error("Chat streaming error:", err);
+          setStreamingContent("");
+        } finally {
+          setIsStreaming(false);
         }
-
-        await queryClient.invalidateQueries({
-          queryKey: ["chatHistory", doubtId],
-        });
-
-        setStreamingContent("");
-        setStreamingUserMessage("");
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Failed to send message";
-        setError(msg);
-        console.error("Chat streaming error:", err);
-        setStreamingUserMessage("");
-        setStreamingContent("");
-      } finally {
-        setIsStreaming(false);
-      }
+      });
     },
-    [doubtId, isStreaming, queryClient],
+    [doubtId, isStreaming, queryClient, addOptimisticMessage],
   );
 
   const stopStreaming = useCallback(() => {
