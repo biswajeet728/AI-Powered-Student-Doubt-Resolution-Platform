@@ -1,6 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/get-sessions";
 
 export async function updateProfileName(name: string) {
@@ -14,9 +16,11 @@ export async function updateProfileName(name: string) {
   }
 
   try {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { name: name.trim() },
+    // Use better-auth's updateUser so the cached session cookie is refreshed
+    // alongside the DB row — a raw prisma update leaves the cookieCache stale.
+    await auth.api.updateUser({
+      body: { name: name.trim() },
+      headers: await headers(),
     });
 
     return { success: true };
@@ -34,9 +38,10 @@ export async function updateProfileImage(imageUrl: string | null) {
   }
 
   try {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { image: imageUrl },
+    // Same as name — go through better-auth so the session cookie stays in sync.
+    await auth.api.updateUser({
+      body: { image: imageUrl },
+      headers: await headers(),
     });
 
     return { success: true };
