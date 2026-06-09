@@ -19,7 +19,7 @@ interface UserContextType {
   closeChatSheet: () => void;
 }
 
-const UserContext = createContext<UserContextType | null>(null);
+export const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({
   initialUser,

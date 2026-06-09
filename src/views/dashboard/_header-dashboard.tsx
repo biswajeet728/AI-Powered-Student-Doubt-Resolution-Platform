@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@/lib/providers/user-context";
+import { UserContext, useUser } from "@/lib/providers/user-context";
 import DashboardUserMenu from "./_dashboard-user-menu";
-import DashboardMobileMenu from "./_dashboard-mobile-menu";
 import { HiOutlineAcademicCap } from "react-icons/hi2";
+import { use } from "react";
 
 export default function HeaderDashboard() {
-  const { user } = useUser();
+  // const { user } = useUser();
+  const { user } = use(UserContext)!;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#2a2826]/80 backdrop-blur-md">
