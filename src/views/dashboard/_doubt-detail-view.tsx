@@ -123,7 +123,11 @@ export default function DoubtDetailView({
 
   const doubt = result?.success ? result.doubt! : initialDoubt;
 
-  // AI is generating when doubt has no AI response yet and is not resolved
+  const orderedResponses = [...doubt.responses].sort((a, b) => {
+    if (a.source !== b.source) return a.source === "TEACHER" ? -1 : 1;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+
   const isAiGenerating =
     doubt.status !== "RESOLVED" &&
     !doubt.responses.some((r) => r.source === "AI");
@@ -374,7 +378,7 @@ export default function DoubtDetailView({
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
-                    {doubt.responses.map((response) => {
+                    {orderedResponses.map((response) => {
                       const isDisapproved =
                         response.source === "AI" &&
                         response.content.startsWith("__DISAPPROVED__:");

@@ -16,6 +16,7 @@ import {
   HiOutlinePencilSquare,
   HiOutlineCheckCircle,
 } from "react-icons/hi2";
+import { signOut } from "@/lib/auth-client";
 
 interface ProfileViewProps {
   user: {
@@ -87,10 +88,10 @@ export default function ProfileView({ user, stats }: ProfileViewProps) {
     startPasswordTransition(async () => {
       const result = await changePassword(currentPassword, newPassword);
       if (result.success) {
-        toast.success("Password changed!");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
+        toast.success("Password changed! Signing out from all devices...");
+        // Sign out from all sessions and redirect to sign-in
+        await signOut();
+        router.push("/sign-in");
       } else {
         toast.error(result.error || "Failed to change password");
       }

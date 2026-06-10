@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/get-sessions";
@@ -52,14 +52,20 @@ export async function updateProfileImage(imageUrl: string | null) {
   }
 }
 
-export async function changePassword(currentPassword: string, newPassword: string) {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+) {
   const session = await getServerSession();
   if (!session?.user) {
     return { success: false, error: "Not authenticated" };
   }
 
   if (newPassword.length < 8) {
-    return { success: false, error: "New password must be at least 8 characters" };
+    return {
+      success: false,
+      error: "New password must be at least 8 characters",
+    };
   }
 
   try {
@@ -94,6 +100,13 @@ export async function changePassword(currentPassword: string, newPassword: strin
       where: { id: account.id },
       data: { password: hashedPassword },
     });
+
+    try {
+      const res = await auth.api.revokeSessions({ headers: await headers() });
+      console.log("revoke", res);
+    } catch (revokeError) {
+      console.error("Failed to revoke other sessions:", revokeError);
+    }
 
     return { success: true };
   } catch (error) {
